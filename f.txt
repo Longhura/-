@@ -1,0 +1,524 @@
+-- === Services ===
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+
+-- === Biến cục bộ Player và Character ===
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character and Character:WaitForChild("Humanoid", 15)
+local RootPart = Character and Character:WaitForChild("HumanoidRootPart", 15)
+
+-- === Biến trạng thái và điều khiển ===
+-- Bay
+local flying = false
+local autoFlyToEnemy = false
+local currentTargetHRP = nil
+local manualTargetPlayer = nil
+local bodyGyro = nil
+local bodyVelocity = nil
+local flySpeed = 50
+local minFlySpeed = 10
+local flySpeedIncrement = 10
+local autoFlyUpdateConnection = nil
+
+-- Noclip
+local noclipEnabled = false
+local noclipConnection = nil
+
+-- Flight Check *** THÊM ***
+local flightCheckEnabled = false
+local flightCheckConnection = nil
+
+-- GUI
+local playerListFrame = nil
+local isDraggingIcon = false
+
+-- === Cấu hình GUI ===
+local oldGui = CoreGui:FindFirstChild("AdvancedFlightGUI_Screen_Select")
+if oldGui then oldGui:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AdvancedFlightGUI_Screen_Select"
+ScreenGui.Parent = CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+
+local Frame = Instance.new("Frame")
+local UICornerFrame = Instance.new("UICorner")
+local UIGradientFrame = Instance.new("UIGradient")
+local UIStroke = Instance.new("UIStroke")
+local UICornerStroke = Instance.new("UICorner")
+local CloseButton = Instance.new("TextButton")
+local UICornerButton = Instance.new("UICorner")
+local MinimizeButton = Instance.new("TextButton")
+local UICornerMinimize = Instance.new("UICorner")
+local DraggableIconButton = Instance.new("TextButton")
+local UICornerIcon = Instance.new("UICorner")
+
+Frame.Name = "MainFrame"
+Frame.Parent = ScreenGui
+Frame.BackgroundTransparency = 0.1
+Frame.Position = UDim2.new(0.5, -180, 0.5, -170) -- *** Điều chỉnh Y để chứa nút mới ***
+Frame.Size = UDim2.new(0, 360, 0, 300) -- *** Tăng kích thước Y để chứa nút mới ***
+Frame.Active = true
+Frame.Draggable = true
+Frame.BorderSizePixel = 0
+Frame.ClipsDescendants = true
+Frame.Visible = true
+
+UICornerFrame.CornerRadius = UDim.new(0, 12); UICornerFrame.Parent = Frame
+UIGradientFrame.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 55, 55)), ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 30, 30))}); UIGradientFrame.Rotation = 90; UIGradientFrame.Parent = Frame
+UIStroke.Parent = Frame; UIStroke.Thickness = 3; UIStroke.Color = Color3.fromRGB(255, 0, 0); UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; UIStroke.LineJoinMode = Enum.LineJoinMode.Round
+UICornerStroke.CornerRadius = UICornerFrame.CornerRadius; UICornerStroke.Parent = UIStroke
+
+CloseButton.Parent = Frame; CloseButton.Size = UDim2.new(0, 25, 0, 25); CloseButton.Position = UDim2.new(1, -30, 0, 5); CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50); CloseButton.BackgroundTransparency = 0.3; CloseButton.Text = "X"; CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255); CloseButton.Font = Enum.Font.GothamBold; CloseButton.TextSize = 16; CloseButton.BorderSizePixel = 0; CloseButton.AutoButtonColor = false; CloseButton.ZIndex = 10
+UICornerButton.CornerRadius = UDim.new(0, 6); UICornerButton.Parent = CloseButton
+
+MinimizeButton.Parent = Frame; MinimizeButton.Name = "MinimizeButton"; MinimizeButton.Size = UDim2.new(0, 25, 0, 25); MinimizeButton.Position = UDim2.new(1, -60, 0, 5); MinimizeButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80); MinimizeButton.BackgroundTransparency = 0.3; MinimizeButton.Text = "-"; MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255); MinimizeButton.Font = Enum.Font.GothamBold; MinimizeButton.TextSize = 20; MinimizeButton.BorderSizePixel = 0; MinimizeButton.AutoButtonColor = false; MinimizeButton.ZIndex = 10
+UICornerMinimize.CornerRadius = UDim.new(0, 6); UICornerMinimize.Parent = MinimizeButton
+
+DraggableIconButton.Name = "DraggableIcon"; DraggableIconButton.Parent = ScreenGui; DraggableIconButton.Size = UDim2.new(0, 45, 0, 45); DraggableIconButton.Position = UDim2.new(0, 20, 0, 50); DraggableIconButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180); DraggableIconButton.BackgroundTransparency = 0.2; DraggableIconButton.Text = "✈️"; DraggableIconButton.TextColor3 = Color3.fromRGB(255, 255, 255); DraggableIconButton.Font = Enum.Font.GothamBold; DraggableIconButton.TextScaled = true; DraggableIconButton.BorderSizePixel = 0; DraggableIconButton.AutoButtonColor = false; DraggableIconButton.Active = true; DraggableIconButton.Draggable = true; DraggableIconButton.Visible = false; DraggableIconButton.ZIndex = 100
+UICornerIcon.CornerRadius = UDim.new(0.5, 0); UICornerIcon.Parent = DraggableIconButton
+
+-- Khung chứa nút
+local ButtonHolderFrame = Instance.new("Frame")
+ButtonHolderFrame.Name = "ButtonHolder"; ButtonHolderFrame.Parent = Frame; ButtonHolderFrame.BackgroundTransparency = 1; ButtonHolderFrame.Size = UDim2.new(1, -20, 1, -40); ButtonHolderFrame.Position = UDim2.new(0, 10, 0, 35); ButtonHolderFrame.ZIndex = 1
+
+local FunctionListLayout = Instance.new("UIListLayout")
+FunctionListLayout.Padding = UDim.new(0, 8); FunctionListLayout.SortOrder = Enum.SortOrder.LayoutOrder; FunctionListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center; FunctionListLayout.VerticalAlignment = Enum.VerticalAlignment.Top; FunctionListLayout.Parent = ButtonHolderFrame
+
+-- === Hàm tạo nút chức năng ===
+local tweenInfoHover = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local activeColor = Color3.fromRGB(50, 200, 50)
+local function createFunctionButton(name, text, order, defaultColor, activeIcon, inactiveIcon) -- *** Thêm icon vào hàm ***
+	local btn = Instance.new("TextButton")
+	local corner = Instance.new("UICorner")
+	local originalColor = defaultColor or Color3.fromRGB(80, 120, 220)
+	local iconText = inactiveIcon or "" -- Icon mặc định là rỗng
+
+	btn.Name = name .. "Button"
+	btn.Parent = ButtonHolderFrame
+	btn.Size = UDim2.new(0.9, 0, 0, 38)
+	btn.LayoutOrder = order
+	btn.BackgroundColor3 = originalColor
+	btn.BackgroundTransparency = 0.2
+	btn.Text = text .. " " .. iconText -- *** Hiển thị text + icon ***
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.GothamBold; btn.TextSize = 16
+	btn.BorderSizePixel = 0
+	btn.AutoButtonColor = false; btn.ZIndex = 2
+	corner.CornerRadius = UDim.new(0, 8); corner.Parent = btn
+	btn:SetAttribute("OriginalColor", originalColor)
+	btn:SetAttribute("BaseText", text) -- *** Lưu text gốc ***
+	btn:SetAttribute("ActiveIcon", activeIcon or "")
+	btn:SetAttribute("InactiveIcon", inactiveIcon or "")
+
+	local hoverColor = originalColor:Lerp(Color3.new(1,1,1), 0.2)
+	btn.MouseEnter:Connect(function()
+		local currentBgColor = btn.BackgroundColor3
+		local targetHoverColor = (currentBgColor == activeColor or currentBgColor == btn:GetAttribute("ActiveColor")) and currentBgColor:Lerp(Color3.new(1,1,1), 0.1) or hoverColor
+		pcall(TweenService.Create, TweenService, btn, tweenInfoHover, { BackgroundColor3 = targetHoverColor, BackgroundTransparency = 0 })
+	end)
+	btn.MouseLeave:Connect(function()
+		local currentBgColor = btn.BackgroundColor3
+		local originalOrActiveColor = btn:GetAttribute("ActiveColor") or originalColor
+		if currentBgColor == hoverColor or currentBgColor:Lerp(Color3.new(1,1,1), 0.1) == btn.BackgroundColor3 then
+			pcall(TweenService.Create, TweenService, btn, tweenInfoHover, { BackgroundColor3 = originalOrActiveColor, BackgroundTransparency = 0.2 })
+		end
+	end)
+	return btn
+end
+
+-- === Tạo các nút chức năng ===
+local SelectTargetButton = createFunctionButton("SelectTarget", "Target:", 1, Color3.fromRGB(150, 100, 200))
+local AutoFlyButton = createFunctionButton("AutoFly", "Auto Fly:", 2, nil, "ON", "OFF") -- Thêm icon ON/OFF
+local NoclipButton = createFunctionButton("Noclip", "Noclip:", 3, Color3.fromRGB(220, 150, 50), "ON", "OFF") -- Thêm icon ON/OFF
+local FlightCheckButton = createFunctionButton("FlightCheck", "Check:", 4, Color3.fromRGB(100, 180, 100), "✅", "❎") -- *** THÊM NÚT CHECK ***
+
+-- Khung điều khiển tốc độ
+local SpeedControlFrame = Instance.new("Frame")
+SpeedControlFrame.Name = "SpeedControlFrame"; SpeedControlFrame.Size = UDim2.new(0.9, 0, 0, 38); SpeedControlFrame.LayoutOrder = 5; -- *** Cập nhật LayoutOrder ***
+SpeedControlFrame.BackgroundTransparency = 1; SpeedControlFrame.Parent = ButtonHolderFrame
+
+local MinusSpeedButton = Instance.new("TextButton"); local UICornerMinusSpeed = Instance.new("UICorner"); MinusSpeedButton.Name = "MinusSpeedButton"; MinusSpeedButton.Parent = SpeedControlFrame; MinusSpeedButton.Size = UDim2.new(0.2, 0, 1, 0); MinusSpeedButton.Position = UDim2.new(0, 0, 0, 0); MinusSpeedButton.BackgroundColor3 = Color3.fromRGB(200, 100, 100); MinusSpeedButton.BackgroundTransparency = 0.2; MinusSpeedButton.Text = "-"; MinusSpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255); MinusSpeedButton.Font = Enum.Font.GothamBold; MinusSpeedButton.TextSize = 20; MinusSpeedButton.BorderSizePixel = 0; MinusSpeedButton.AutoButtonColor = false; MinusSpeedButton.ZIndex = 1; UICornerMinusSpeed.CornerRadius = UDim.new(0, 6); UICornerMinusSpeed.Parent = MinusSpeedButton
+local SpeedDisplayLabel = Instance.new("TextLabel"); local UICornerSpeedLabel = Instance.new("UICorner"); SpeedDisplayLabel.Name = "SpeedDisplayLabel"; SpeedDisplayLabel.Parent = SpeedControlFrame; SpeedDisplayLabel.Size = UDim2.new(0.6, -10, 1, 0); SpeedDisplayLabel.Position = UDim2.new(0.2, 5, 0, 0); SpeedDisplayLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60); SpeedDisplayLabel.BackgroundTransparency = 0.3; SpeedDisplayLabel.Text = "Speed: " .. flySpeed; SpeedDisplayLabel.TextColor3 = Color3.fromRGB(255, 255, 255); SpeedDisplayLabel.Font = Enum.Font.GothamMedium; SpeedDisplayLabel.TextSize = 14; SpeedDisplayLabel.TextXAlignment = Enum.TextXAlignment.Center; SpeedDisplayLabel.ZIndex = 1; UICornerSpeedLabel.CornerRadius = UDim.new(0, 4); UICornerSpeedLabel.Parent = SpeedDisplayLabel
+local PlusSpeedButton = Instance.new("TextButton"); local UICornerPlusSpeed = Instance.new("UICorner"); PlusSpeedButton.Name = "PlusSpeedButton"; PlusSpeedButton.Parent = SpeedControlFrame; PlusSpeedButton.Size = UDim2.new(0.2, 0, 1, 0); PlusSpeedButton.Position = UDim2.new(0.8, 0, 0, 0); PlusSpeedButton.BackgroundColor3 = Color3.fromRGB(100, 200, 100); PlusSpeedButton.BackgroundTransparency = 0.2; PlusSpeedButton.Text = "+"; PlusSpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255); PlusSpeedButton.Font = Enum.Font.GothamBold; PlusSpeedButton.TextSize = 20; PlusSpeedButton.BorderSizePixel = 0; PlusSpeedButton.AutoButtonColor = false; PlusSpeedButton.ZIndex = 1; UICornerPlusSpeed.CornerRadius = UDim.new(0, 6); UICornerPlusSpeed.Parent = PlusSpeedButton
+
+-- === Hàm cập nhật giao diện nút ===
+local function updateButtonAppearance(button, isActive) -- *** Sửa hàm để dùng icon ***
+	local originalColor = button:GetAttribute("OriginalColor") or Color3.fromRGB(80,120,220)
+	local baseText = button:GetAttribute("BaseText") or button.Name:gsub("Button", "") -- Lấy text gốc
+	local activeIcon = button:GetAttribute("ActiveIcon") or ""
+	local inactiveIcon = button:GetAttribute("InactiveIcon") or ""
+
+	if isActive then
+		button.BackgroundColor3 = activeColor
+		button.Text = baseText .. " " .. activeIcon
+		button:SetAttribute("ActiveColor", activeColor)
+	else
+		button.BackgroundColor3 = originalColor
+		button.Text = baseText .. " " .. inactiveIcon
+		button:SetAttribute("ActiveColor", nil)
+	end
+end
+
+local function updateAllButtonAppearances()
+	pcall(function()
+		-- Cập nhật các nút có trạng thái ON/OFF hoặc ✅/❎
+		updateButtonAppearance(AutoFlyButton, autoFlyToEnemy)
+		updateButtonAppearance(NoclipButton, noclipEnabled)
+		updateButtonAppearance(FlightCheckButton, flightCheckEnabled) -- *** Cập nhật nút Check ***
+
+		-- Cập nhật nút Target riêng
+		local targetBaseText = SelectTargetButton:GetAttribute("BaseText") or "Target:"
+		if manualTargetPlayer and manualTargetPlayer.Parent then
+			SelectTargetButton.Text = targetBaseText .. " " .. manualTargetPlayer.Name
+			SelectTargetButton.BackgroundColor3 = SelectTargetButton:GetAttribute("OriginalColor"):Lerp(Color3.new(1,1,1), -0.2) -- Làm tối màu khi có target
+		else
+			SelectTargetButton.Text = targetBaseText .. " Nearest"
+			SelectTargetButton.BackgroundColor3 = SelectTargetButton:GetAttribute("OriginalColor") -- Màu gốc
+		end
+	end)
+end
+
+-- Hiệu ứng hover
+local function setupSpeedButtonHover(button, hoverColor)
+	local originalColor = button.BackgroundColor3; local originalTransparency = button.BackgroundTransparency
+	button.MouseEnter:Connect(function() pcall(TweenService.Create, TweenService, button, tweenInfoHover, { BackgroundColor3 = hoverColor, BackgroundTransparency = 0 }) end)
+	button.MouseLeave:Connect(function() pcall(TweenService.Create, TweenService, button, tweenInfoHover, { BackgroundColor3 = originalColor, BackgroundTransparency = originalTransparency }) end)
+end
+setupSpeedButtonHover(MinusSpeedButton, Color3.fromRGB(230, 120, 120)); setupSpeedButtonHover(PlusSpeedButton, Color3.fromRGB(120, 230, 120))
+CloseButton.MouseEnter:Connect(function() pcall(TweenService.Create, TweenService, CloseButton, tweenInfoHover, { BackgroundColor3 = Color3.fromRGB(255, 80, 80), BackgroundTransparency = 0 }) end); CloseButton.MouseLeave:Connect(function() pcall(TweenService.Create, TweenService, CloseButton, tweenInfoHover, { BackgroundColor3 = Color3.fromRGB(200, 50, 50), BackgroundTransparency = 0.3 }) end)
+MinimizeButton.MouseEnter:Connect(function() pcall(TweenService.Create, TweenService, MinimizeButton, tweenInfoHover, { BackgroundColor3 = Color3.fromRGB(120, 120, 120), BackgroundTransparency = 0 }) end); MinimizeButton.MouseLeave:Connect(function() pcall(TweenService.Create, TweenService, MinimizeButton, tweenInfoHover, { BackgroundColor3 = Color3.fromRGB(80, 80, 80), BackgroundTransparency = 0.3 }) end)
+local iconOriginalColor = DraggableIconButton.BackgroundColor3; local iconHoverColor = iconOriginalColor:Lerp(Color3.new(1,1,1), 0.1)
+DraggableIconButton.MouseEnter:Connect(function() if not isDraggingIcon then pcall(TweenService.Create, TweenService, DraggableIconButton, tweenInfoHover, { BackgroundColor3 = iconHoverColor, BackgroundTransparency = 0.1 }) end end); DraggableIconButton.MouseLeave:Connect(function() if not isDraggingIcon then pcall(TweenService.Create, TweenService, DraggableIconButton, tweenInfoHover, { BackgroundColor3 = iconOriginalColor, BackgroundTransparency = 0.2 }) end end)
+DraggableIconButton.DragBegin:Connect(function() isDraggingIcon = true end); DraggableIconButton.DragStopped:Connect(function() isDraggingIcon = false end)
+
+-- === Các hàm chức năng ===
+
+-- Hàm đổi màu viền
+local rainbowConnection = nil
+local function cycleRainbow()
+	local hue = 0; local saturation = 1; local value = 1; local speed = 0.5
+	if rainbowConnection then rainbowConnection:Disconnect() end
+	rainbowConnection = RunService.Heartbeat:Connect(function(deltaTime)
+		if not UIStroke or not UIStroke.Parent then if rainbowConnection then rainbowConnection:Disconnect(); rainbowConnection = nil end; return end
+		hue = (hue + deltaTime / speed) % 1; UIStroke.Color = Color3.fromHSV(hue, saturation, value)
+	end)
+end
+
+-- Hàm tìm kẻ địch
+local function getAllEnemyPlayers()
+	local enemies = {}; local playerTeam = Player.Team
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		if otherPlayer ~= Player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local otherHumanoid = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+			if otherHumanoid and otherHumanoid.Health > 0 then
+				local isEnemy = true; if playerTeam and otherPlayer.Team == playerTeam then isEnemy = false end
+				if isEnemy then table.insert(enemies, otherPlayer) end
+			end
+		end
+	end; return enemies
+end
+
+-- Hàm tìm kẻ địch gần nhất
+local function findNearestEnemyPlayer()
+	local minDist = math.huge; local nearestPlayer = nil; local enemies = getAllEnemyPlayers()
+	if not RootPart then return nil end; local currentPos = RootPart.Position
+	for _, enemyPlayer in ipairs(enemies) do
+		if enemyPlayer.Character and enemyPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local enemyRootPart = enemyPlayer.Character.HumanoidRootPart; local dist = (currentPos - enemyRootPart.Position).Magnitude
+			if dist < minDist then minDist = dist; nearestPlayer = enemyPlayer end
+		end
+	end; return nearestPlayer
+end
+
+-- Hàm hiển thị danh sách người chơi
+local function showPlayerList()
+	if playerListFrame and playerListFrame.Parent then playerListFrame:Destroy() end
+	playerListFrame = Instance.new("Frame"); local listCorner = Instance.new("UICorner"); local listTitle = Instance.new("TextLabel"); local closeListButton = Instance.new("TextButton"); local closeCorner = Instance.new("UICorner"); local scrollFrame = Instance.new("ScrollingFrame"); local layout = Instance.new("UIListLayout")
+	playerListFrame.Name = "PlayerListFrame"; playerListFrame.Size = UDim2.new(0, 220, 0, 300); local mainFramePos = Frame.AbsolutePosition; local mainFrameSize = Frame.AbsoluteSize; playerListFrame.Position = UDim2.fromOffset(mainFramePos.X + mainFrameSize.X + 10, mainFramePos.Y); playerListFrame.AnchorPoint = Vector2.new(0, 0); playerListFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45); playerListFrame.BackgroundTransparency = 0.1; playerListFrame.Parent = ScreenGui; playerListFrame.ZIndex = Frame.ZIndex + 1
+	listCorner.CornerRadius = UDim.new(0, 10); listCorner.Parent = playerListFrame; listTitle.Size = UDim2.new(1, 0, 0, 30); listTitle.BackgroundColor3 = Color3.fromRGB(60, 60, 60); listTitle.Text = "Select Target"; listTitle.TextColor3 = Color3.fromRGB(255, 255, 255); listTitle.Font = Enum.Font.GothamBold; listTitle.TextSize = 16; listTitle.Parent = playerListFrame; closeListButton.Name = "CloseListButton"; closeListButton.Size = UDim2.new(0, 25, 0, 25); closeListButton.Position = UDim2.new(1, -28, 0, 2); closeListButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50); closeListButton.Text = "X"; closeListButton.TextColor3 = Color3.fromRGB(255, 255, 255); closeListButton.Font = Enum.Font.GothamBold; closeListButton.TextSize = 14; closeListButton.ZIndex = listTitle.ZIndex + 1; closeListButton.Parent = listTitle; closeCorner.CornerRadius = UDim.new(0, 5); closeCorner.Parent = closeListButton
+	scrollFrame.Size = UDim2.new(1, -10, 1, -35); scrollFrame.Position = UDim2.new(0, 5, 0, 30); scrollFrame.BackgroundTransparency = 1; scrollFrame.ScrollBarThickness = 6; scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0); scrollFrame.Parent = playerListFrame; layout.Padding = UDim.new(0, 5); layout.SortOrder = Enum.SortOrder.LayoutOrder; layout.Parent = scrollFrame
+	local nearestBtn = Instance.new("TextButton"); local nearestCorner = Instance.new("UICorner"); nearestBtn.Name = "NearestButton"; nearestBtn.Text = "[ Nearest Enemy ]"; nearestBtn.Size = UDim2.new(1, 0, 0, 30); nearestBtn.LayoutOrder = 0; nearestBtn.BackgroundColor3 = Color3.fromRGB(90, 90, 90); nearestBtn.TextColor3 = Color3.fromRGB(255, 255, 150); nearestBtn.Font = Enum.Font.GothamBold; nearestBtn.TextSize = 14; nearestBtn.Parent = scrollFrame; nearestCorner.CornerRadius = UDim.new(0, 5); nearestCorner.Parent = nearestBtn
+	nearestBtn.MouseButton1Click:Connect(function() manualTargetPlayer = nil; print("Target set to Nearest"); updateAllButtonAppearances(); if playerListFrame and playerListFrame.Parent then pcall(playerListFrame.Destroy, playerListFrame) end end)
+	local enemies = getAllEnemyPlayers(); local orderIndex = 1
+	for _, enemyPlayer in ipairs(enemies) do local btn = Instance.new("TextButton"); local btnCorner = Instance.new("UICorner"); btn.Name = enemyPlayer.Name; btn.Text = enemyPlayer.Name; btn.Size = UDim2.new(1, 0, 0, 30); btn.LayoutOrder = orderIndex; btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70); btn.TextColor3 = Color3.fromRGB(255, 255, 255); btn.Font = Enum.Font.GothamMedium; btn.TextSize = 14; btn.Parent = scrollFrame; btnCorner.CornerRadius = UDim.new(0, 5); btnCorner.Parent = btn; btn.MouseButton1Click:Connect(function() manualTargetPlayer = enemyPlayer; print("Manual target set to: " .. enemyPlayer.Name); updateAllButtonAppearances(); if playerListFrame and playerListFrame.Parent then pcall(playerListFrame.Destroy, playerListFrame) end end); orderIndex = orderIndex + 1 end
+	task.wait(); if layout then scrollFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10) end
+	closeListButton.MouseButton1Click:Connect(function() if playerListFrame and playerListFrame.Parent then pcall(playerListFrame.Destroy, playerListFrame) end end)
+end
+
+-- *** THÊM: Hàm tạo BodyMovers (để tái sử dụng trong check) ***
+local function ensureBodyGyro()
+	if not RootPart then return false end
+	if not bodyGyro or bodyGyro.Parent ~= RootPart then
+		pcall(function() if bodyGyro then bodyGyro:Destroy() end end) -- Hủy cái cũ nếu có nhưng sai parent
+		bodyGyro = Instance.new("BodyGyro")
+		bodyGyro.Name = "FlyGyro"
+		bodyGyro.P = 50000
+		bodyGyro.MaxTorque = Vector3.new(4e7, 4e7, 4e7)
+		bodyGyro.CFrame = RootPart.CFrame
+		bodyGyro.Parent = RootPart
+		print("Recreated BodyGyro")
+		return true
+	end
+	return true -- Đã tồn tại và đúng parent
+end
+
+local function ensureBodyVelocity()
+	if not RootPart then return false end
+	if not bodyVelocity or bodyVelocity.Parent ~= RootPart then
+		pcall(function() if bodyVelocity then bodyVelocity:Destroy() end end)
+		bodyVelocity = Instance.new("BodyVelocity")
+		bodyVelocity.Name = "FlyVelocity"
+		bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+		bodyVelocity.Velocity = Vector3.new(0, 0.1, 0) -- Vận tốc mặc định nhỏ
+		bodyVelocity.Parent = RootPart
+		print("Recreated BodyVelocity")
+		return true
+	end
+	return true -- Đã tồn tại và đúng parent
+end
+
+-- Hàm bật/tắt bay cơ bản
+local function toggleFly(enable)
+	if enable == flying then return end
+	flying = enable
+
+	if flying then
+		if not RootPart or not Humanoid or Humanoid.Health <= 0 then flying = false; return end
+		local gyroOK = pcall(ensureBodyGyro)
+		local velOK = pcall(ensureBodyVelocity)
+		if not gyroOK or not velOK then -- Nếu không tạo được thì không bay
+			print("Failed to create BodyMovers for flight.")
+			flying = false
+			pcall(function() if bodyGyro then bodyGyro:Destroy(); bodyGyro = nil end end)
+			pcall(function() if bodyVelocity then bodyVelocity:Destroy(); bodyVelocity = nil end end)
+			return
+		end
+		-- Chỉ kết nối updateFlight nếu chưa có hoặc đã ngắt
+		if not autoFlyUpdateConnection or not autoFlyUpdateConnection.Connected then
+			autoFlyUpdateConnection = RunService.Heartbeat:Connect(updateFlight)
+		end
+		-- Đặt trạng thái Humanoid
+		if Humanoid:GetState() ~= Enum.HumanoidStateType.Physics then
+			pcall(Humanoid.ChangeState, Humanoid, Enum.HumanoidStateType.Physics)
+		end
+	else
+		pcall(function() if bodyGyro then bodyGyro:Destroy(); bodyGyro = nil end end)
+		pcall(function() if bodyVelocity then bodyVelocity:Destroy(); bodyVelocity = nil end end)
+		currentTargetHRP = nil
+		-- Chỉ ngắt kết nối nếu nó đang tồn tại và kết nối
+		if autoFlyUpdateConnection and autoFlyUpdateConnection.Connected then
+			autoFlyUpdateConnection:Disconnect(); autoFlyUpdateConnection = nil
+		end
+		-- Đặt lại trạng thái Humanoid
+		if Humanoid and Humanoid:GetState() == Enum.HumanoidStateType.Physics then
+			pcall(Humanoid.ChangeState, Humanoid, Enum.HumanoidStateType.GettingUp)
+		end
+	end
+	-- Không cần gọi updateAllButtonAppearances ở đây vì toggleAutoFlyEnemy sẽ gọi
+end
+
+-- Hàm bật/tắt Auto Fly Enemy
+local function toggleAutoFlyEnemy()
+	autoFlyToEnemy = not autoFlyToEnemy
+	if autoFlyToEnemy then
+		toggleFly(true) -- Bật cơ chế bay chung
+		print("Auto Fly Enemy: ON")
+	else
+		toggleFly(false) -- Tắt cơ chế bay chung
+		print("Auto Fly Enemy: OFF")
+	end
+	updateAllButtonAppearances() -- Cập nhật nút sau khi thay đổi trạng thái
+end
+
+-- Hàm bật/tắt Noclip
+local function toggleNoclip(enable)
+	if enable == noclipEnabled then return end; noclipEnabled = enable
+	if noclipEnabled then
+		print("Noclip: ON"); if noclipConnection and noclipConnection.Connected then noclipConnection:Disconnect() end
+		noclipConnection = RunService.Heartbeat:Connect(function()
+			if not noclipEnabled then if noclipConnection and noclipConnection.Connected then noclipConnection:Disconnect(); noclipConnection = nil end; return end
+			if Character and Humanoid and Humanoid.Health > 0 then for _, part in ipairs(Character:GetDescendants()) do if part:IsA("BasePart") then pcall(function() part.CanCollide = false end) end end; if Humanoid:GetState() ~= Enum.HumanoidStateType.Running and Humanoid:GetState() ~= Enum.HumanoidStateType.Physics and Humanoid:GetState() ~= Enum.HumanoidStateType.Flying then pcall(Humanoid.SetStateEnabled, Humanoid, Enum.HumanoidStateType.GettingUp, false) end
+			else if noclipConnection and noclipConnection.Connected then noclipConnection:Disconnect(); noclipConnection = nil end; noclipEnabled = false; updateAllButtonAppearances() end
+		end)
+	else
+		print("Noclip: OFF"); if noclipConnection and noclipConnection.Connected then noclipConnection:Disconnect(); noclipConnection = nil end
+		if Character then for _, part in ipairs(Character:GetDescendants()) do if part:IsA("BasePart") then pcall(function() part.CanCollide = true end) end end end
+		if Humanoid then pcall(Humanoid.SetStateEnabled, Humanoid, Enum.HumanoidStateType.GettingUp, true) end
+	end
+	updateAllButtonAppearances()
+end
+
+-- *** THÊM: Hàm vòng lặp kiểm tra trạng thái bay ***
+local function flightCheckLoop()
+	if not flightCheckEnabled then return end -- Chỉ chạy khi bật
+	if not flying and not autoFlyToEnemy then return end -- Chỉ chạy khi đang bay
+
+	-- Kiểm tra điều kiện cơ bản
+	if not Character or not RootPart or not Humanoid or Humanoid.Health <= 0 then
+		print("Flight Check: Invalid character state, stopping flight.")
+		toggleFly(false) -- Tắt bay nếu char không hợp lệ
+		if autoFlyToEnemy then autoFlyToEnemy = false; updateAllButtonAppearances() end
+		return
+	end
+
+	-- Kiểm tra và tái tạo BodyMovers nếu cần
+	local gyroOK = pcall(ensureBodyGyro)
+	local velOK = pcall(ensureBodyVelocity)
+
+	if not gyroOK or not velOK then
+		warn("Flight Check: Failed to ensure BodyMovers!")
+		-- Có thể thêm logic tắt bay ở đây nếu muốn an toàn hơn
+	end
+
+	-- Đảm bảo trạng thái Humanoid là Physics
+	if Humanoid:GetState() ~= Enum.HumanoidStateType.Physics then
+		print("Flight Check: Humanoid state not Physics, attempting to set.")
+		local success, err = pcall(Humanoid.ChangeState, Humanoid, Enum.HumanoidStateType.Physics)
+		if not success then warn("Flight Check: Failed to set Humanoid state to Physics - ", err) end
+	end
+end
+
+-- *** THÊM: Hàm bật/tắt Flight Check ***
+local function toggleFlightCheck(enable)
+	if enable == flightCheckEnabled then return end
+	flightCheckEnabled = enable
+
+	if flightCheckEnabled then
+		print("Flight Check: ON ✅")
+		if flightCheckConnection and flightCheckConnection.Connected then flightCheckConnection:Disconnect() end -- Ngắt cái cũ nếu có
+		flightCheckConnection = RunService.Heartbeat:Connect(flightCheckLoop) -- Kết nối vòng lặp kiểm tra
+	else
+		print("Flight Check: OFF ❎")
+		if flightCheckConnection and flightCheckConnection.Connected then
+			flightCheckConnection:Disconnect()
+			flightCheckConnection = nil
+		end
+	end
+	updateAllButtonAppearances()
+end
+
+
+-- Hàm cập nhật trạng thái bay
+function updateFlight()
+	-- *** Bỏ kiểm tra BodyMovers ở đây vì flightCheckLoop sẽ xử lý ***
+	if not flying or not RootPart or not RootPart.Parent or not Humanoid or Humanoid.Health <= 0 then
+		if flying then toggleFly(false) end
+		if autoFlyUpdateConnection and autoFlyUpdateConnection.Connected then autoFlyUpdateConnection:Disconnect(); autoFlyUpdateConnection = nil end
+		return
+	end
+
+	local targetRootPart = nil
+	if manualTargetPlayer and manualTargetPlayer.Parent and manualTargetPlayer.Character then
+		local targetChar = manualTargetPlayer.Character; local targetHumanoid = targetChar:FindFirstChildOfClass("Humanoid"); local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+		if targetHumanoid and targetHumanoid.Health > 0 and targetHRP then targetRootPart = targetHRP
+		else print("Manual target " .. manualTargetPlayer.Name .. " invalid, switching to nearest."); manualTargetPlayer = nil; updateAllButtonAppearances(); local nearestPlayer = findNearestEnemyPlayer(); if nearestPlayer and nearestPlayer.Character then targetRootPart = nearestPlayer.Character:FindFirstChild("HumanoidRootPart") end end
+	else local nearestPlayer = findNearestEnemyPlayer(); if nearestPlayer and nearestPlayer.Character then targetRootPart = nearestPlayer.Character:FindFirstChild("HumanoidRootPart") end end
+
+	currentTargetHRP = targetRootPart
+
+	if currentTargetHRP and currentTargetHRP.Parent and bodyVelocity and bodyGyro then -- Thêm kiểm tra bodyVelocity/Gyro tồn tại
+		local targetPosition = currentTargetHRP.Position; local currentPosition = RootPart.Position; local direction = (targetPosition - currentPosition).Unit
+		pcall(function() bodyVelocity.Velocity = direction * flySpeed end)
+		local lookAtPoint = targetPosition + Vector3.new(0, 2, 0)
+		pcall(function() bodyGyro.CFrame = CFrame.lookAt(currentPosition, lookAtPoint) end)
+	elseif bodyVelocity and bodyGyro then -- Bay lơ lửng nếu không có target
+		pcall(function() bodyVelocity.Velocity = Vector3.new(0, 0.1, 0) end)
+		if workspace.CurrentCamera then pcall(function() bodyGyro.CFrame = workspace.CurrentCamera.CFrame end) end
+	end
+end
+
+-- Hàm đóng GUI
+local function closeGui()
+	print("Closing GUI and stopping functions...")
+	pcall(cleanupStates)
+	if rainbowConnection and rainbowConnection.Connected then rainbowConnection:Disconnect(); rainbowConnection = nil; print("Rainbow disconnected.") end
+	if autoFlyUpdateConnection and autoFlyUpdateConnection.Connected then autoFlyUpdateConnection:Disconnect(); autoFlyUpdateConnection = nil; print("AutoFly disconnected.") end
+	if noclipConnection and noclipConnection.Connected then noclipConnection:Disconnect(); noclipConnection = nil; print("Noclip disconnected.") end
+	if flightCheckConnection and flightCheckConnection.Connected then flightCheckConnection:Disconnect(); flightCheckConnection = nil; print("FlightCheck disconnected.") end -- *** Ngắt Flight Check ***
+
+	if noclipEnabled then noclipEnabled = false; if Character then for _, part in ipairs(Character:GetDescendants()) do if part:IsA("BasePart") then pcall(function() part.CanCollide = true end) end end; print("Collision restored.") end; if Humanoid then pcall(Humanoid.SetStateEnabled, Humanoid, Enum.HumanoidStateType.GettingUp, true); print("GettingUp state re-enabled.") end end
+
+	if ScreenGui and ScreenGui.Parent then ScreenGui:Destroy(); print("ScreenGui destroyed."); ScreenGui = nil
+	else print("ScreenGui not found or already destroyed.") end
+end
+
+-- === Kết nối sự kiện ===
+CloseButton.MouseButton1Click:Connect(function() print("Close button clicked."); pcall(closeGui) end)
+SelectTargetButton.MouseButton1Click:Connect(function() pcall(showPlayerList) end)
+AutoFlyButton.MouseButton1Click:Connect(function() pcall(toggleAutoFlyEnemy) end) -- Đã bao gồm update appearance
+NoclipButton.MouseButton1Click:Connect(function() pcall(toggleNoclip, not noclipEnabled) end)
+FlightCheckButton.MouseButton1Click:Connect(function() pcall(toggleFlightCheck, not flightCheckEnabled) end) -- *** Kết nối nút Check ***
+
+MinusSpeedButton.MouseButton1Click:Connect(function() flySpeed = math.max(minFlySpeed, flySpeed - flySpeedIncrement); SpeedDisplayLabel.Text = "Speed: " .. flySpeed; print("Fly Speed: " .. flySpeed) end)
+PlusSpeedButton.MouseButton1Click:Connect(function() flySpeed = flySpeed + flySpeedIncrement; SpeedDisplayLabel.Text = "Speed: " .. flySpeed; print("Fly Speed: " .. flySpeed) end)
+
+MinimizeButton.MouseButton1Click:Connect(function() if Frame and DraggableIconButton then Frame.Visible = false; DraggableIconButton.Visible = true; print("GUI Minimized"); if playerListFrame and playerListFrame.Parent then pcall(playerListFrame.Destroy, playerListFrame) end end end)
+DraggableIconButton.MouseButton1Click:Connect(function() if not isDraggingIcon and Frame and DraggableIconButton then Frame.Visible = true; DraggableIconButton.Visible = false; print("GUI Restored") end end)
+
+-- === Xử lý Reset/Chết/Dọn dẹp ===
+local function cleanupStates()
+	print("Cleaning up states...")
+	pcall(function() if flying then toggleFly(false) end end)
+	pcall(function() if noclipEnabled then toggleNoclip(false) end end)
+	pcall(function() if flightCheckEnabled then toggleFlightCheck(false) end end) -- *** Tắt Flight Check khi dọn dẹp ***
+	autoFlyToEnemy = false
+	manualTargetPlayer = nil
+	currentTargetHRP = nil
+	if playerListFrame and playerListFrame.Parent then pcall(playerListFrame.Destroy, playerListFrame) end
+	flySpeed = 50
+	if SpeedDisplayLabel then pcall(function() SpeedDisplayLabel.Text = "Speed: " .. flySpeed end) end
+	if Frame then Frame.Visible = true end
+	if DraggableIconButton then DraggableIconButton.Visible = false end
+	pcall(updateAllButtonAppearances) -- Cập nhật lại giao diện nút sau khi reset trạng thái
+	print("States cleaned.")
+end
+
+-- Khi nhân vật chết
+if Humanoid then Humanoid.Died:Connect(cleanupStates) end
+
+-- Khi nhân vật được tạo lại / reset
+Player.CharacterAdded:Connect(function(newCharacter)
+	print("Character respawned. Re-initializing...")
+	task.wait(0.5)
+	Character = newCharacter
+	local successHumanoid, newHumanoid = pcall(function() return Character:WaitForChild("Humanoid", 10) end)
+	local successRootPart, newRootPart = pcall(function() return Character:WaitForChild("HumanoidRootPart", 10) end)
+	if not successHumanoid or not newHumanoid or not successRootPart or not newRootPart then warn("Could not find Humanoid or RootPart on new character after respawn."); pcall(closeGui); return end
+	Humanoid = newHumanoid; RootPart = newRootPart; print("New character references obtained.")
+	cleanupStates()
+	Humanoid.Died:Connect(cleanupStates); print("Died event reconnected.")
+end)
+
+-- Khi GUI bị hủy
+ScreenGui.Destroying:Connect(function()
+	print("GUI Destroying event detected. Cleaning up...")
+	pcall(cleanupStates)
+	if rainbowConnection and rainbowConnection.Connected then rainbowConnection:Disconnect(); rainbowConnection = nil; end
+	if autoFlyUpdateConnection and autoFlyUpdateConnection.Connected then autoFlyUpdateConnection:Disconnect(); autoFlyUpdateConnection = nil; end
+	if noclipConnection and noclipConnection.Connected then noclipConnection:Disconnect(); noclipConnection = nil; end
+	if flightCheckConnection and flightCheckConnection.Connected then flightCheckConnection:Disconnect(); flightCheckConnection = nil; end -- *** Ngắt Flight Check ***
+	print("Cleanup on destroying finished.")
+end)
+
+-- === Khởi chạy ban đầu ===
+local function initialize()
+	if Humanoid and RootPart then
+		pcall(cycleRainbow)
+		pcall(updateAllButtonAppearances) -- Gọi sau khi các nút đã tạo
+		pcall(function() SpeedDisplayLabel.Text = "Speed: " .. flySpeed end)
+		print("Flight, Noclip & Check GUI Initialized.")
+	else
+		warn("Flight GUI could not initialize - Character/Humanoid/RootPart not found initially.")
+		task.wait(5); if ScreenGui and ScreenGui.Parent then pcall(ScreenGui.Destroy, ScreenGui) end
+	end
+end
+
+local success, err = pcall(initialize)
+if not success then warn("Error during GUI initialization:", err); if ScreenGui and ScreenGui.Parent then pcall(ScreenGui.Destroy, ScreenGui) end end
