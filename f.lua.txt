@@ -1,15 +1,15 @@
 -- Roblox Executor Script
--- Features: Draggable GUI, Minimize, Close, Player Targeting, Teleport, Noclip, Distance Adjustment, Auto Platform
+-- Features: Draggable GUI, Minimize, Close, Player Targeting, Teleport, Noclip, Distance Adjustment, Auto Platform, Position Saving
 
 -- Configuration (EDIT THESE VALUES)
 local KEY = "123456" -- Change this to your desired key
 local EXPIRATION_DATE = {
-    Year = 2025,
-    Month = 5,
-    Day = 15,
-    Hour = 12,
-    Minute = 0,
-    Second = 0
+Year = 2025,
+Month = 0,
+Day = 128,
+Hour = 0,
+Minute = 0,
+Second = 0
 }
 
 -- Services
@@ -33,11 +33,20 @@ local AutoPlatform = false
 local RunningAway = false
 local FollowingTarget = false
 local AutoNextTarget = false
+local AutoCheckPosition = false
+local SubMenuVisible = false
 
 -- Distance Settings
 local DistanceBehind = 5
 local DistanceAbove = 0
 local DetectionRadius = 20
+
+-- Safe Position Boundaries
+local SafePositionMin = Vector3.new(-1000, -1000, -1000)
+local SafePositionMax = Vector3.new(1000, 1000, 1000)
+
+-- Saved Position
+local SavedPosition = nil
 
 -- Target Variables
 local TargetPlayer = nil
@@ -52,11 +61,12 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 -- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 350, 0, 450)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
+MainFrame.Size = UDim2.new(0, 350, 0, 400) -- Reduced height
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
+MainFrame.Draggable = true -- Enable built-in dragging
 MainFrame.Parent = ScreenGui
 
 -- Add UICorner for rounded corners
@@ -87,7 +97,7 @@ TitleCorner.Parent = TitleBar
 -- Title
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Size = UDim2.new(1, -60, 1, 0)
+Title.Size = UDim2.new(1, -90, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -96,6 +106,24 @@ Title.Font = Enum.Font.SourceSansBold
 Title.Text = "Roblox Executor"
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleBar
+
+-- SubMenu Button
+local SubMenuButton = Instance.new("TextButton")
+SubMenuButton.Name = "SubMenuButton"
+SubMenuButton.Size = UDim2.new(0, 30, 0, 30)
+SubMenuButton.Position = UDim2.new(1, -90, 0, 0)
+SubMenuButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+SubMenuButton.BorderSizePixel = 0
+SubMenuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SubMenuButton.TextSize = 16
+SubMenuButton.Font = Enum.Font.SourceSansBold
+SubMenuButton.Text = "≡"
+SubMenuButton.Parent = TitleBar
+
+-- Add UICorner for submenu button
+local SubMenuCorner = Instance.new("UICorner")
+SubMenuCorner.CornerRadius = UDim.new(0, 8)
+SubMenuCorner.Parent = SubMenuButton
 
 -- Close Button
 local CloseButton = Instance.new("TextButton")
@@ -219,7 +247,7 @@ FeaturesFrame.BorderSizePixel = 0
 FeaturesFrame.Visible = false
 FeaturesFrame.Parent = ContentFrame
 
--- Create ScrollingFrame for content
+-- Create ScrollingFrame for content with increased canvas size
 local ScrollFrame = Instance.new("ScrollingFrame")
 ScrollFrame.Name = "ScrollFrame"
 ScrollFrame.Size = UDim2.new(1, -10, 1, -10)
@@ -227,7 +255,11 @@ ScrollFrame.Position = UDim2.new(0, 5, 0, 5)
 ScrollFrame.BackgroundTransparency = 1
 ScrollFrame.BorderSizePixel = 0
 ScrollFrame.ScrollBarThickness = 6
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 600) -- Will adjust based on content
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 850) -- Increased canvas size for more scrolling space
+ScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Automatically adjust canvas size based on content
+ScrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y -- Only allow vertical scrolling
+ScrollFrame.ScrollingEnabled = true -- Ensure scrolling is enabled
+ScrollFrame.ElasticBehavior = Enum.ElasticBehavior.Always -- Smooth elastic scrolling
 ScrollFrame.Parent = FeaturesFrame
 
 -- Create UIListLayout for organized content
@@ -235,6 +267,63 @@ local ListLayout = Instance.new("UIListLayout")
 ListLayout.Padding = UDim.new(0, 10)
 ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 ListLayout.Parent = ScrollFrame
+
+-- Section: Position Saving
+local PositionSection = Instance.new("Frame")
+PositionSection.Name = "PositionSection"
+PositionSection.Size = UDim2.new(0.95, 0, 0, 100)
+PositionSection.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+PositionSection.BorderSizePixel = 0
+PositionSection.Parent = ScrollFrame
+
+-- Add UICorner for position section
+local PositionSectionCorner = Instance.new("UICorner")
+PositionSectionCorner.CornerRadius = UDim.new(0, 8)
+PositionSectionCorner.Parent = PositionSection
+
+local PositionTitle = Instance.new("TextLabel")
+PositionTitle.Name = "PositionTitle"
+PositionTitle.Size = UDim2.new(1, 0, 0, 30)
+PositionTitle.BackgroundTransparency = 1
+PositionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+PositionTitle.TextSize = 16
+PositionTitle.Font = Enum.Font.SourceSansBold
+PositionTitle.Text = "Position Controls"
+PositionTitle.Parent = PositionSection
+
+local SavePositionButton = Instance.new("TextButton")
+SavePositionButton.Name = "SavePositionButton"
+SavePositionButton.Size = UDim2.new(0.45, 0, 0, 35)
+SavePositionButton.Position = UDim2.new(0.05, 0, 0, 40)
+SavePositionButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+SavePositionButton.BorderSizePixel = 0
+SavePositionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SavePositionButton.TextSize = 14
+SavePositionButton.Font = Enum.Font.SourceSansBold
+SavePositionButton.Text = "Save Position"
+SavePositionButton.Parent = PositionSection
+
+-- Add UICorner for save position button
+local SavePositionCorner = Instance.new("UICorner")
+SavePositionCorner.CornerRadius = UDim.new(0, 6)
+SavePositionCorner.Parent = SavePositionButton
+
+local TeleportToSavedButton = Instance.new("TextButton")
+TeleportToSavedButton.Name = "TeleportToSavedButton"
+TeleportToSavedButton.Size = UDim2.new(0.45, 0, 0, 35)
+TeleportToSavedButton.Position = UDim2.new(0.5, 0, 0, 40)
+TeleportToSavedButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+TeleportToSavedButton.BorderSizePixel = 0
+TeleportToSavedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportToSavedButton.TextSize = 14
+TeleportToSavedButton.Font = Enum.Font.SourceSansBold
+TeleportToSavedButton.Text = "Teleport to Saved"
+TeleportToSavedButton.Parent = PositionSection
+
+-- Add UICorner for teleport to saved button
+local TeleportToSavedCorner = Instance.new("UICorner")
+TeleportToSavedCorner.CornerRadius = UDim.new(0, 6)
+TeleportToSavedCorner.Parent = TeleportToSavedButton
 
 -- Section: Player Targeting
 local TargetSection = Instance.new("Frame")
@@ -330,7 +419,7 @@ NextCorner.Parent = NextButton
 -- Dropdown Frame for player selection
 local DropdownFrame = Instance.new("Frame")
 DropdownFrame.Name = "DropdownFrame"
-DropdownFrame.Size = UDim2.new(0.6, 0, 0, 150)
+DropdownFrame.Size = UDim2.new(0.6, 0, 0, 200) -- Increased height for more players
 DropdownFrame.Position = UDim2.new(0.05, 0, 0, 65)
 DropdownFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 DropdownFrame.BorderSizePixel = 0
@@ -343,7 +432,7 @@ local DropdownFrameCorner = Instance.new("UICorner")
 DropdownFrameCorner.CornerRadius = UDim.new(0, 6)
 DropdownFrameCorner.Parent = DropdownFrame
 
--- ScrollingFrame for player list
+-- ScrollingFrame for player list with improved scrolling
 local PlayerScrollFrame = Instance.new("ScrollingFrame")
 PlayerScrollFrame.Name = "PlayerScrollFrame"
 PlayerScrollFrame.Size = UDim2.new(1, -10, 1, -10)
@@ -352,6 +441,10 @@ PlayerScrollFrame.BackgroundTransparency = 1
 PlayerScrollFrame.BorderSizePixel = 0
 PlayerScrollFrame.ScrollBarThickness = 4
 PlayerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will adjust based on content
+PlayerScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Automatically adjust canvas size
+PlayerScrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y -- Only allow vertical scrolling
+PlayerScrollFrame.ScrollingEnabled = true -- Ensure scrolling is enabled
+PlayerScrollFrame.ElasticBehavior = Enum.ElasticBehavior.Always -- Smooth elastic scrolling
 PlayerScrollFrame.ZIndex = 11
 PlayerScrollFrame.Parent = DropdownFrame
 
@@ -800,6 +893,8 @@ MinimizedIcon.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 MinimizedIcon.BorderSizePixel = 0
 MinimizedIcon.Image = "rbxassetid://6034684949" -- Generic script icon
 MinimizedIcon.Visible = false
+MinimizedIcon.Active = true -- Enable interaction
+MinimizedIcon.Draggable = true -- Enable built-in dragging
 MinimizedIcon.Parent = ScreenGui
 
 -- Add UICorner for minimized icon
@@ -814,624 +909,1090 @@ MinimizedIconStroke.Color = Color3.fromRGB(255, 0, 0)
 MinimizedIconStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 MinimizedIconStroke.Parent = MinimizedIcon
 
+-- SubMenu Frame (Hidden by default)
+local SubMenuFrame = Instance.new("Frame")
+SubMenuFrame.Name = "SubMenuFrame"
+SubMenuFrame.Size = UDim2.new(0, 250, 0, 300)
+SubMenuFrame.Position = UDim2.new(0.5, 175, 0.5, -150)
+SubMenuFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SubMenuFrame.BorderSizePixel = 0
+SubMenuFrame.Visible = false
+SubMenuFrame.Active = true
+SubMenuFrame.Draggable = true -- Enable built-in dragging
+SubMenuFrame.Parent = ScreenGui
+
+-- Add UICorner for submenu frame
+local SubMenuCorner = Instance.new("UICorner")
+SubMenuCorner.CornerRadius = UDim.new(0, 8)
+SubMenuCorner.Parent = SubMenuFrame
+
+-- Add UIStroke for submenu frame
+local SubMenuStroke = Instance.new("UIStroke")
+SubMenuStroke.Thickness = 2
+SubMenuStroke.Color = Color3.fromRGB(255, 0, 0)
+SubMenuStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+SubMenuStroke.Parent = SubMenuFrame
+
+-- SubMenu Title Bar
+local SubMenuTitleBar = Instance.new("Frame")
+SubMenuTitleBar.Name = "SubMenuTitleBar"
+SubMenuTitleBar.Size = UDim2.new(1, 0, 0, 30)
+SubMenuTitleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+SubMenuTitleBar.BorderSizePixel = 0
+SubMenuTitleBar.Parent = SubMenuFrame
+
+-- Add UICorner for submenu title bar
+local SubMenuTitleCorner = Instance.new("UICorner")
+SubMenuTitleCorner.CornerRadius = UDim.new(0, 8)
+SubMenuTitleCorner.Parent = SubMenuTitleBar
+
+-- SubMenu Title
+local SubMenuTitle = Instance.new("TextLabel")
+SubMenuTitle.Name = "SubMenuTitle"
+SubMenuTitle.Size = UDim2.new(1, -40, 1, 0)
+SubMenuTitle.Position = UDim2.new(0, 10, 0, 0)
+SubMenuTitle.BackgroundTransparency = 1
+SubMenuTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+SubMenuTitle.TextSize = 16
+SubMenuTitle.Font = Enum.Font.SourceSansBold
+SubMenuTitle.Text = "Safety Settings"
+SubMenuTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubMenuTitle.Parent = SubMenuTitleBar
+
+-- SubMenu Close Button
+local SubMenuCloseButton = Instance.new("TextButton")
+SubMenuCloseButton.Name = "SubMenuCloseButton"
+SubMenuCloseButton.Size = UDim2.new(0, 30, 0, 30)
+SubMenuCloseButton.Position = UDim2.new(1, -30, 0, 0)
+SubMenuCloseButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+SubMenuCloseButton.BorderSizePixel = 0
+SubMenuCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SubMenuCloseButton.TextSize = 16
+SubMenuCloseButton.Font = Enum.Font.SourceSansBold
+SubMenuCloseButton.Text = "X"
+SubMenuCloseButton.Parent = SubMenuTitleBar
+
+-- Add UICorner for submenu close button
+local SubMenuCloseCorner = Instance.new("UICorner")
+SubMenuCloseCorner.CornerRadius = UDim.new(0, 8)
+SubMenuCloseCorner.Parent = SubMenuCloseButton
+
+-- SubMenu Content
+local SubMenuContent = Instance.new("Frame")
+SubMenuContent.Name = "SubMenuContent"
+SubMenuContent.Size = UDim2.new(1, 0, 1, -30)
+SubMenuContent.Position = UDim2.new(0, 0, 0, 30)
+SubMenuContent.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SubMenuContent.BorderSizePixel = 0
+SubMenuContent.Parent = SubMenuFrame
+
+-- Auto Check Position Toggle
+local AutoCheckLabel = Instance.new("TextLabel")
+AutoCheckLabel.Name = "AutoCheckLabel"
+AutoCheckLabel.Size = UDim2.new(0.7, 0, 0, 30)
+AutoCheckLabel.Position = UDim2.new(0.05, 0, 0, 10)
+AutoCheckLabel.BackgroundTransparency = 1
+AutoCheckLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoCheckLabel.TextSize = 14
+AutoCheckLabel.Font = Enum.Font.SourceSansBold
+AutoCheckLabel.Text = "Auto Check Position:"
+AutoCheckLabel.TextXAlignment = Enum.TextXAlignment.Left
+AutoCheckLabel.Parent = SubMenuContent
+
+local AutoCheckButton = Instance.new("TextButton")
+AutoCheckButton.Name = "AutoCheckButton"
+AutoCheckButton.Size = UDim2.new(0.2, 0, 0, 30)
+AutoCheckButton.Position = UDim2.new(0.75, 0, 0, 10)
+AutoCheckButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+AutoCheckButton.BorderSizePixel = 0
+AutoCheckButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoCheckButton.TextSize = 14
+AutoCheckButton.Font = Enum.Font.SourceSansBold
+AutoCheckButton.Text = "OFF"
+AutoCheckButton.Parent = SubMenuContent
+
+-- Add UICorner for auto check button
+local AutoCheckCorner = Instance.new("UICorner")
+AutoCheckCorner.CornerRadius = UDim.new(0, 6)
+AutoCheckCorner.Parent = AutoCheckButton
+
+-- Safe Position Vertical Min
+local VerticalMinLabel = Instance.new("TextLabel")
+VerticalMinLabel.Name = "VerticalMinLabel"
+VerticalMinLabel.Size = UDim2.new(0.5, 0, 0, 30)
+VerticalMinLabel.Position = UDim2.new(0.05, 0, 0, 50)
+VerticalMinLabel.BackgroundTransparency = 1
+VerticalMinLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerticalMinLabel.TextSize = 14
+VerticalMinLabel.Font = Enum.Font.SourceSans
+VerticalMinLabel.Text = "Vertical Min (Y):"
+VerticalMinLabel.TextXAlignment = Enum.TextXAlignment.Left
+VerticalMinLabel.Parent = SubMenuContent
+
+local VerticalMinInput = Instance.new("TextBox")
+VerticalMinInput.Name = "VerticalMinInput"
+VerticalMinInput.Size = UDim2.new(0.3, 0, 0, 30)
+VerticalMinInput.Position = UDim2.new(0.65, 0, 0, 50)
+VerticalMinInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+VerticalMinInput.BorderSizePixel = 0
+VerticalMinInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerticalMinInput.TextSize = 14
+VerticalMinInput.Font = Enum.Font.SourceSans
+VerticalMinInput.Text = "-1000"
+VerticalMinInput.Parent = SubMenuContent
+
+-- Add UICorner for vertical min input
+local VerticalMinCorner = Instance.new("UICorner")
+VerticalMinCorner.CornerRadius = UDim.new(0, 6)
+VerticalMinCorner.Parent = VerticalMinInput
+
+-- Safe Position Vertical Max
+local VerticalMaxLabel = Instance.new("TextLabel")
+VerticalMaxLabel.Name = "VerticalMaxLabel"
+VerticalMaxLabel.Size = UDim2.new(0.5, 0, 0, 30)
+VerticalMaxLabel.Position = UDim2.new(0.05, 0, 0, 90)
+VerticalMaxLabel.BackgroundTransparency = 1
+VerticalMaxLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerticalMaxLabel.TextSize = 14
+VerticalMaxLabel.Font = Enum.Font.SourceSans
+VerticalMaxLabel.Text = "Vertical Max (Y):"
+VerticalMaxLabel.TextXAlignment = Enum.TextXAlignment.Left
+VerticalMaxLabel.Parent = SubMenuContent
+
+local VerticalMaxInput = Instance.new("TextBox")
+VerticalMaxInput.Name = "VerticalMaxInput"
+VerticalMaxInput.Size = UDim2.new(0.3, 0, 0, 30)
+VerticalMaxInput.Position = UDim2.new(0.65, 0, 0, 90)
+VerticalMaxInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+VerticalMaxInput.BorderSizePixel = 0
+VerticalMaxInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerticalMaxInput.TextSize = 14
+VerticalMaxInput.Font = Enum.Font.SourceSans
+VerticalMaxInput.Text = "1000"
+VerticalMaxInput.Parent = SubMenuContent
+
+-- Add UICorner for vertical max input
+local VerticalMaxCorner = Instance.new("UICorner")
+VerticalMaxCorner.CornerRadius = UDim.new(0, 6)
+VerticalMaxCorner.Parent = VerticalMaxInput
+
+-- Safe Position Horizontal Min
+local HorizontalMinLabel = Instance.new("TextLabel")
+HorizontalMinLabel.Name = "HorizontalMinLabel"
+HorizontalMinLabel.Size = UDim2.new(0.5, 0, 0, 30)
+HorizontalMinLabel.Position = UDim2.new(0.05, 0, 0, 130)
+HorizontalMinLabel.BackgroundTransparency = 1
+HorizontalMinLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+HorizontalMinLabel.TextSize = 14
+HorizontalMinLabel.Font = Enum.Font.SourceSans
+HorizontalMinLabel.Text = "Horizontal Min (X/Z):"
+HorizontalMinLabel.TextXAlignment = Enum.TextXAlignment.Left
+HorizontalMinLabel.Parent = SubMenuContent
+
+local HorizontalMinInput = Instance.new("TextBox")
+HorizontalMinInput.Name = "HorizontalMinInput"
+HorizontalMinInput.Size = UDim2.new(0.3, 0, 0, 30)
+HorizontalMinInput.Position = UDim2.new(0.65, 0, 0, 130)
+HorizontalMinInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+HorizontalMinInput.BorderSizePixel = 0
+HorizontalMinInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+HorizontalMinInput.TextSize = 14
+HorizontalMinInput.Font = Enum.Font.SourceSans
+HorizontalMinInput.Text = "-1000"
+HorizontalMinInput.Parent = SubMenuContent
+
+-- Add UICorner for horizontal min input
+local HorizontalMinCorner = Instance.new("UICorner")
+HorizontalMinCorner.CornerRadius = UDim.new(0, 6)
+HorizontalMinCorner.Parent = HorizontalMinInput
+
+-- Safe Position Horizontal Max
+local HorizontalMaxLabel = Instance.new("TextLabel")
+HorizontalMaxLabel.Name = "HorizontalMaxLabel"
+HorizontalMaxLabel.Size = UDim2.new(0.5, 0, 0, 30)
+HorizontalMaxLabel.Position = UDim2.new(0.05, 0, 0, 170)
+HorizontalMaxLabel.BackgroundTransparency = 1
+HorizontalMaxLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+HorizontalMaxLabel.TextSize = 14
+HorizontalMaxLabel.Font = Enum.Font.SourceSans
+HorizontalMaxLabel.Text = "Horizontal Max (X/Z):"
+HorizontalMaxLabel.TextXAlignment = Enum.TextXAlignment.Left
+HorizontalMaxLabel.Parent = SubMenuContent
+
+local HorizontalMaxInput = Instance.new("TextBox")
+HorizontalMaxInput.Name = "HorizontalMaxInput"
+HorizontalMaxInput.Size = UDim2.new(0.3, 0, 0, 30)
+HorizontalMaxInput.Position = UDim2.new(0.65, 0, 0, 170)
+HorizontalMaxInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+HorizontalMaxInput.BorderSizePixel = 0
+HorizontalMaxInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+HorizontalMaxInput.TextSize = 14
+HorizontalMaxInput.Font = Enum.Font.SourceSans
+HorizontalMaxInput.Text = "1000"
+HorizontalMaxInput.Parent = SubMenuContent
+
+-- Add UICorner for horizontal max input
+local HorizontalMaxCorner = Instance.new("UICorner")
+HorizontalMaxCorner.CornerRadius = UDim.new(0, 6)
+HorizontalMaxCorner.Parent = HorizontalMaxInput
+
+-- Apply Settings Button
+local ApplySettingsButton = Instance.new("TextButton")
+ApplySettingsButton.Name = "ApplySettingsButton"
+ApplySettingsButton.Size = UDim2.new(0.9, 0, 0, 40)
+ApplySettingsButton.Position = UDim2.new(0.05, 0, 0, 220)
+ApplySettingsButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+ApplySettingsButton.BorderSizePixel = 0
+ApplySettingsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ApplySettingsButton.TextSize = 16
+ApplySettingsButton.Font = Enum.Font.SourceSansBold
+ApplySettingsButton.Text = "Apply Settings"
+ApplySettingsButton.Parent = SubMenuContent
+
+-- Add UICorner for apply settings button
+local ApplySettingsCorner = Instance.new("UICorner")
+ApplySettingsCorner.CornerRadius = UDim.new(0, 6)
+ApplySettingsCorner.Parent = ApplySettingsButton
+
 -- Functions
 local function CheckExpiration()
-    local currentTime = os.time()
-    local expirationTime = os.time({
-        year = EXPIRATION_DATE.Year,
-        month = EXPIRATION_DATE.Month,
-        day = EXPIRATION_DATE.Day,
-        hour = EXPIRATION_DATE.Hour,
-        min = EXPIRATION_DATE.Minute,
-        sec = EXPIRATION_DATE.Second
-    })
+local currentTime = os.time()
+local expirationTime = os.time({
+    year = EXPIRATION_DATE.Year,
+    month = EXPIRATION_DATE.Month,
+    day = EXPIRATION_DATE.Day,
+    hour = EXPIRATION_DATE.Hour,
+    min = EXPIRATION_DATE.Minute,
+    sec = EXPIRATION_DATE.Second
+})
 
-    local timeLeft = expirationTime - currentTime
+local timeLeft = expirationTime - currentTime
 
-    if timeLeft <= 0 then
-        -- Script has expired
-        AuthFrame.Visible = false
-        FeaturesFrame.Visible = false
-        ExpiredFrame.Visible = true
-        return true
-    else
-        -- Calculate time left
-        local days = math.floor(timeLeft / 86400)
-        local hours = math.floor((timeLeft % 86400) / 3600)
-        local minutes = math.floor((timeLeft % 3600) / 60)
-        local seconds = timeLeft % 60
-        
-        ExpirationLabel.Text = string.format("Expires in: %d days, %02d:%02d:%02d", days, hours, minutes, seconds)
-        return false
-    end
+if timeLeft <= 0 then
+    -- Script has expired
+    AuthFrame.Visible = false
+    FeaturesFrame.Visible = false
+    ExpiredFrame.Visible = true
+    return true
+else
+    -- Calculate time left
+    local days = math.floor(timeLeft / 86400)
+    local hours = math.floor((timeLeft % 86400) / 3600)
+    local minutes = math.floor((timeLeft % 3600) / 60)
+    local seconds = timeLeft % 60
+    
+    ExpirationLabel.Text = string.format("Expires in: %d days, %02d:%02d:%02d", days, hours, minutes, seconds)
+    return false
+end
 end
 
 -- Rainbow border effect
 local function StartRainbowEffect()
-    local colors = {
-        Color3.fromRGB(255, 0, 0),    -- Red
-        Color3.fromRGB(255, 165, 0),  -- Orange
-        Color3.fromRGB(255, 255, 0),  -- Yellow
-        Color3.fromRGB(0, 255, 0),    -- Green
-        Color3.fromRGB(0, 0, 255),    -- Blue
-        Color3.fromRGB(75, 0, 130),   -- Indigo
-        Color3.fromRGB(238, 130, 238) -- Violet
-    }
-    
-    local index = 1
-    
-    spawn(function()
-        while ScreenGui.Parent do
-            local targetColor = colors[index]
-            local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
-            
-            local mainTween = TweenService:Create(MainStroke, tweenInfo, {Color = targetColor})
-            local iconTween = TweenService:Create(MinimizedIconStroke, tweenInfo, {Color = targetColor})
-            
-            mainTween:Play()
-            iconTween:Play()
-            
-            index = (index % #colors) + 1
-            wait(0.5)
-        end
-    end)
+local colors = {
+    Color3.fromRGB(255, 0, 0),    -- Red
+    Color3.fromRGB(255, 165, 0),  -- Orange
+    Color3.fromRGB(255, 255, 0),  -- Yellow
+    Color3.fromRGB(0, 255, 0),    -- Green
+    Color3.fromRGB(0, 0, 255),    -- Blue
+    Color3.fromRGB(75, 0, 130),   -- Indigo
+    Color3.fromRGB(238, 130, 238) -- Violet
+}
+
+local index = 1
+
+spawn(function()
+    while ScreenGui.Parent do
+        local targetColor = colors[index]
+        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+        
+        local mainTween = TweenService:Create(MainStroke, tweenInfo, {Color = targetColor})
+        local iconTween = TweenService:Create(MinimizedIconStroke, tweenInfo, {Color = targetColor})
+        local subMenuTween = TweenService:Create(SubMenuStroke, tweenInfo, {Color = targetColor})
+        
+        mainTween:Play()
+        iconTween:Play()
+        subMenuTween:Play()
+        
+        index = (index % #colors) + 1
+        wait(0.5)
+    end
+end)
 end
 
 -- Player list functions
 local function PopulatePlayerList()
-    -- Clear existing buttons
-    for _, child in pairs(PlayerScrollFrame:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
+-- Clear existing buttons
+for _, child in pairs(PlayerScrollFrame:GetChildren()) do
+    if child:IsA("TextButton") then
+        child:Destroy()
     end
-    
-    -- Clear player list
-    PlayerList = {}
-    
-    -- Add all players except local player
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            table.insert(PlayerList, player)
-            
-            local playerButton = Instance.new("TextButton")
-            playerButton.Name = player.Name .. "Button"
-            playerButton.Size = UDim2.new(0.9, 0, 0, 30)
-            playerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            playerButton.BorderSizePixel = 0
-            playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            playerButton.TextSize = 14
-            playerButton.Font = Enum.Font.SourceSans
-            playerButton.Text = player.Name
-            playerButton.ZIndex = 12
-            playerButton.Parent = PlayerScrollFrame
-            
-            -- Add UICorner for player button
-            local playerButtonCorner = Instance.new("UICorner")
-            playerButtonCorner.CornerRadius = UDim.new(0, 4)
-            playerButtonCorner.Parent = playerButton
-            
-            playerButton.MouseButton1Click:Connect(function()
-                TargetPlayer = player
-                TargetDropdown.Text = player.Name
-                DropdownFrame.Visible = false
-            end)
-        end
+end
+
+-- Clear player list
+PlayerList = {}
+
+-- Add all players except local player
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        table.insert(PlayerList, player)
+        
+        local playerButton = Instance.new("TextButton")
+        playerButton.Name = player.Name .. "Button"
+        playerButton.Size = UDim2.new(0.9, 0, 0, 30)
+        playerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        playerButton.BorderSizePixel = 0
+        playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        playerButton.TextSize = 14
+        playerButton.Font = Enum.Font.SourceSans
+        playerButton.Text = player.Name
+        playerButton.ZIndex = 12
+        playerButton.Parent = PlayerScrollFrame
+        
+        -- Add UICorner for player button
+        local playerButtonCorner = Instance.new("UICorner")
+        playerButtonCorner.CornerRadius = UDim.new(0, 4)
+        playerButtonCorner.Parent = playerButton
+        
+        playerButton.MouseButton1Click:Connect(function()
+            TargetPlayer = player
+            TargetDropdown.Text = player.Name
+            DropdownFrame.Visible = false
+        end)
     end
-    
-    -- Update canvas size
-    PlayerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, #PlayerList * 35)
+end
+
+-- Update canvas size based on number of players
+local contentHeight = #PlayerList * 35
+PlayerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
 end
 
 -- Toggle noclip function
 local function ToggleNoclip()
-    NoClipping = not NoClipping
+NoClipping = not NoClipping
+
+if NoClipping then
+    NoclipButton.Text = "Noclip: ON"
+    NoclipButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
     
-    if NoClipping then
-        NoclipButton.Text = "Noclip: ON"
-        NoclipButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        
-        -- Enable noclip
-        local noclipConnection = RunService.Stepped:Connect(function()
-            if Character and NoClipping then
-                for _, part in pairs(Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
+    -- Enable noclip
+    local noclipConnection = RunService.Stepped:Connect(function()
+        if Character and NoClipping then
+            for _, part in pairs(Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
                 end
             end
-        end)
-        
-        -- Store the connection
-        NoclipButton.NoclipConnection = noclipConnection
-    else
-        NoclipButton.Text = "Noclip: OFF"
-        NoclipButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-        
-        -- Disable noclip
-        if NoclipButton.NoclipConnection then
-            NoclipButton.NoclipConnection:Disconnect()
-            NoclipButton.NoclipConnection = nil
         end
-        
-        -- Reset collision
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
+    end)
+    
+    -- Store the connection
+    NoclipButton.NoclipConnection = noclipConnection
+else
+    NoclipButton.Text = "Noclip: OFF"
+    NoclipButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    
+    -- Disable noclip
+    if NoclipButton.NoclipConnection then
+        NoclipButton.NoclipConnection:Disconnect()
+        NoclipButton.NoclipConnection = nil
+    end
+    
+    -- Reset collision
+    for _, part in pairs(Character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
         end
     end
+end
 end
 
 -- Platform function
 local function TogglePlatform()
-    AutoPlatform = not AutoPlatform
+AutoPlatform = not AutoPlatform
+
+if AutoPlatform then
+    PlatformButton.Text = "Platform: ON"
+    PlatformButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+    AutoPlatformCheck.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
     
-    if AutoPlatform then
-        PlatformButton.Text = "Platform: ON"
-        PlatformButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        AutoPlatformCheck.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        
-        -- Create platform
-        local platform = Instance.new("Part")
-        platform.Name = "ExecutorPlatform"
-        platform.Size = Vector3.new(5, 1, 5)
-        platform.Anchored = true
-        platform.CanCollide = true
-        platform.Transparency = 0.5
-        platform.Material = Enum.Material.Neon
-        platform.Color = Color3.fromRGB(0, 120, 255)
-        platform.Parent = workspace
-        
-        -- Platform update loop
-        local platformConnection = RunService.Heartbeat:Connect(function()
-            if AutoPlatform and Character and Character:FindFirstChild("HumanoidRootPart") then
-                platform.CFrame = CFrame.new(HumanoidRootPart.Position.X, HumanoidRootPart.Position.Y - 3.5, HumanoidRootPart.Position.Z)
-            end
-        end)
-        
-        -- Store references
-        PlatformButton.Platform = platform
-        PlatformButton.PlatformConnection = platformConnection
-    else
-        PlatformButton.Text = "Platform: OFF"
-        PlatformButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-        AutoPlatformCheck.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        
-        -- Remove platform
-        if PlatformButton.Platform and PlatformButton.Platform:IsDescendantOf(workspace) then
-            PlatformButton.Platform:Destroy()
-            PlatformButton.Platform = nil
+    -- Create platform
+    local platform = Instance.new("Part")
+    platform.Name = "ExecutorPlatform"
+    platform.Size = Vector3.new(5, 1, 5)
+    platform.Anchored = true
+    platform.CanCollide = true
+    platform.Transparency = 0.5
+    platform.Material = Enum.Material.Neon
+    platform.Color = Color3.fromRGB(0, 120, 255)
+    platform.Parent = workspace
+    
+    -- Platform update loop
+    local platformConnection = RunService.Heartbeat:Connect(function()
+        if AutoPlatform and Character and Character:FindFirstChild("HumanoidRootPart") then
+            platform.CFrame = CFrame.new(HumanoidRootPart.Position.X, HumanoidRootPart.Position.Y - 3.5, HumanoidRootPart.Position.Z)
         end
-        
-        -- Disconnect update loop
-        if PlatformButton.PlatformConnection then
-            PlatformButton.PlatformConnection:Disconnect()
-            PlatformButton.PlatformConnection = nil
-        end
+    end)
+    
+    -- Store references
+    PlatformButton.Platform = platform
+    PlatformButton.PlatformConnection = platformConnection
+else
+    PlatformButton.Text = "Platform: OFF"
+    PlatformButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    AutoPlatformCheck.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    
+    -- Remove platform
+    if PlatformButton.Platform and PlatformButton.Platform:IsDescendantOf(workspace) then
+        PlatformButton.Platform:Destroy()
+        PlatformButton.Platform = nil
     end
+    
+    -- Disconnect update loop
+    if PlatformButton.PlatformConnection then
+        PlatformButton.PlatformConnection:Disconnect()
+        PlatformButton.PlatformConnection = nil
+    end
+end
 end
 
 -- Follow target function
 local function ToggleFollowTarget()
-    FollowingTarget = not FollowingTarget
-    
-    if FollowingTarget then
-        if not TargetPlayer or not TargetPlayer.Character then
-            FollowingTarget = false
-            return
-        end
-        
-        FollowButton.Text = "Follow: ON"
-        FollowButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        
-        -- Get distance values
-        DistanceBehind = tonumber(HorizontalInput.Text) or 5
-        DistanceAbove = tonumber(VerticalInput.Text) or 0
-        
-        -- Follow loop
-        local followConnection = RunService.Heartbeat:Connect(function()
-            if FollowingTarget and TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("HumanoidRootPart") and Character and Character:FindFirstChild("HumanoidRootPart") then
-                local targetHRP = TargetPlayer.Character.HumanoidRootPart
-                local targetHumanoid = TargetPlayer.Character:FindFirstChild("Humanoid")
-                
-                -- Check if target is dead and auto next is enabled
-                if AutoNextTarget and targetHumanoid and targetHumanoid.Health <= 0 then
-                    -- Find next target
-                    local foundNext = false
-                    for _, player in pairs(PlayerList) do
-                        if player ~= TargetPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
-                            TargetPlayer = player
-                            TargetDropdown.Text = player.Name
-                            foundNext = true
-                            break
-                        end
-                    end
-                    
-                    if not foundNext then
-                        FollowingTarget = false
-                        FollowButton.Text = "Follow: OFF"
-                        FollowButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-                        followConnection:Disconnect()
-                    end
-                else
-                    -- Calculate position behind target
-                    local targetLookVector = targetHRP.CFrame.LookVector
-                    local behindPosition = targetHRP.Position - (targetLookVector * DistanceBehind)
-                    behindPosition = behindPosition + Vector3.new(0, DistanceAbove, 0)
-                    
-                    -- Teleport behind target
-                    HumanoidRootPart.CFrame = CFrame.new(behindPosition, targetHRP.Position)
-                end
-            end
-        end)
-        
-        -- Store connection
-        FollowButton.FollowConnection = followConnection
-    else
-        FollowButton.Text = "Follow: OFF"
-        FollowButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-        
-        -- Disconnect follow loop
-        if FollowButton.FollowConnection then
-            FollowButton.FollowConnection:Disconnect()
-            FollowButton.FollowConnection = nil
-        end
+FollowingTarget = not FollowingTarget
+
+if FollowingTarget then
+    if not TargetPlayer or not TargetPlayer.Character then
+        FollowingTarget = false
+        return
     end
+    
+    FollowButton.Text = "Follow: ON"
+    FollowButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+    
+    -- Get distance values
+    DistanceBehind = tonumber(HorizontalInput.Text) or 5
+    DistanceAbove = tonumber(VerticalInput.Text) or 0
+    
+    -- Follow loop
+    local followConnection = RunService.Heartbeat:Connect(function()
+        if FollowingTarget and TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("HumanoidRootPart") and Character and Character:FindFirstChild("HumanoidRootPart") then
+            local targetHRP = TargetPlayer.Character.HumanoidRootPart
+            local targetHumanoid = TargetPlayer.Character:FindFirstChild("Humanoid")
+            
+            -- Check if target is dead and auto next is enabled
+            if AutoNextTarget and targetHumanoid and targetHumanoid.Health <= 0 then
+                -- Find next target
+                local foundNext = false
+                for _, player in pairs(PlayerList) do
+                    if player ~= TargetPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+                        TargetPlayer = player
+                        TargetDropdown.Text = player.Name
+                        foundNext = true
+                        break
+                    end
+                end
+                
+                if not foundNext then
+                    FollowingTarget = false
+                    FollowButton.Text = "Follow: OFF"
+                    FollowButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+                    followConnection:Disconnect()
+                end
+            else
+                -- Calculate position behind target
+                local targetLookVector = targetHRP.CFrame.LookVector
+                local behindPosition = targetHRP.Position - (targetLookVector * DistanceBehind)
+                behindPosition = behindPosition + Vector3.new(0, DistanceAbove, 0)
+                
+                -- Teleport behind target
+                HumanoidRootPart.CFrame = CFrame.new(behindPosition, targetHRP.Position)
+            end
+        end
+    end)
+    
+    -- Store connection
+    FollowButton.FollowConnection = followConnection
+else
+    FollowButton.Text = "Follow: OFF"
+    FollowButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    
+    -- Disconnect follow loop
+    if FollowButton.FollowConnection then
+        FollowButton.FollowConnection:Disconnect()
+        FollowButton.FollowConnection = nil
+    end
+end
 end
 
 -- Run away function
 local function ToggleRunAway()
-    RunningAway = not RunningAway
+RunningAway = not RunningAway
+
+if RunningAway then
+    RunButton.Text = "Run Away: ON"
+    RunButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+    RunAwayCheck.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
     
-    if RunningAway then
-        RunButton.Text = "Run Away: ON"
-        RunButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        RunAwayCheck.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        
-        -- Get detection radius
-        DetectionRadius = tonumber(RadiusInput.Text) or 20
-        
-        -- Run away loop
-        local runConnection = RunService.Heartbeat:Connect(function()
-            if RunningAway and Character and Character:FindFirstChild("HumanoidRootPart") then
-                -- Check for nearby players
-                for _, player in pairs(Players:GetPlayers()) do
-                    if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        local distance = (HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+    -- Get detection radius
+    DetectionRadius = tonumber(RadiusInput.Text) or 20
+    
+    -- Run away loop
+    local runConnection = RunService.Heartbeat:Connect(function()
+        if RunningAway and Character and Character:FindFirstChild("HumanoidRootPart") then
+            -- Check for nearby players
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                    
+                    if distance <= DetectionRadius then
+                        -- Calculate escape position (100 studs away in opposite direction)
+                        local direction = (HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Unit
+                        local escapePosition = HumanoidRootPart.Position + direction * 100
                         
-                        if distance <= DetectionRadius then
-                            -- Calculate escape position (100 studs away in opposite direction)
-                            local direction = (HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Unit
-                            local escapePosition = HumanoidRootPart.Position + direction * 100
-                            
-                            -- Teleport to escape position
-                            HumanoidRootPart.CFrame = CFrame.new(escapePosition, escapePosition + HumanoidRootPart.CFrame.LookVector)
-                            break
-                        end
+                        -- Teleport to escape position
+                        HumanoidRootPart.CFrame = CFrame.new(escapePosition, escapePosition + HumanoidRootPart.CFrame.LookVector)
+                        break
                     end
                 end
             end
-        end)
-        
-        -- Store connection
-        RunButton.RunConnection = runConnection
-    else
-        RunButton.Text = "Run Away: OFF"
-        RunButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-        RunAwayCheck.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        
-        -- Disconnect run away loop
-        if RunButton.RunConnection then
-            RunButton.RunConnection:Disconnect()
-            RunButton.RunConnection = nil
         end
+    end)
+    
+    -- Store connection
+    RunButton.RunConnection = runConnection
+else
+    RunButton.Text = "Run Away: OFF"
+    RunButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    RunAwayCheck.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    
+    -- Disconnect run away loop
+    if RunButton.RunConnection then
+        RunButton.RunConnection:Disconnect()
+        RunButton.RunConnection = nil
     end
+end
 end
 
 -- Toggle auto next target
 local function ToggleAutoNext()
-    AutoNextTarget = not AutoNextTarget
+AutoNextTarget = not AutoNextTarget
+
+if AutoNextTarget then
+    NextButton.Text = "Auto Next: ON"
+    NextButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+    AutoNextCheck.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+else
+    NextButton.Text = "Auto Next: OFF"
+    NextButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    AutoNextCheck.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+end
+end
+
+-- Save current position
+local function SaveCurrentPosition()
+if Character and Character:FindFirstChild("HumanoidRootPart") then
+    SavedPosition = HumanoidRootPart.CFrame
     
-    if AutoNextTarget then
-        NextButton.Text = "Auto Next: ON"
-        NextButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        AutoNextCheck.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-    else
-        NextButton.Text = "Auto Next: OFF"
-        NextButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        AutoNextCheck.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    -- Show confirmation message
+    local confirmMsg = Instance.new("TextLabel")
+    confirmMsg.Size = UDim2.new(0.9, 0, 0, 20)
+    confirmMsg.Position = UDim2.new(0.05, 0, 0, 75)
+    confirmMsg.BackgroundTransparency = 1
+    confirmMsg.TextColor3 = Color3.fromRGB(0, 255, 0)
+    confirmMsg.TextSize = 12
+    confirmMsg.Font = Enum.Font.SourceSans
+    confirmMsg.Text = "Position saved!"
+    confirmMsg.Parent = PositionSection
+    
+    -- Remove after 2 seconds
+    task.delay(2, function()
+        confirmMsg:Destroy()
+    end)
+end
+end
+
+-- Teleport to saved position
+local function TeleportToSavedPosition()
+if SavedPosition and Character and Character:FindFirstChild("HumanoidRootPart") then
+    HumanoidRootPart.CFrame = SavedPosition
+else
+    -- Show error message
+    local errorMsg = Instance.new("TextLabel")
+    errorMsg.Size = UDim2.new(0.9, 0, 0, 20)
+    errorMsg.Position = UDim2.new(0.05, 0, 0, 75)
+    errorMsg.BackgroundTransparency = 1
+    errorMsg.TextColor3 = Color3.fromRGB(255, 0, 0)
+    errorMsg.TextSize = 12
+    errorMsg.Font = Enum.Font.SourceSans
+    errorMsg.Text = "No position saved!"
+    errorMsg.Parent = PositionSection
+    
+    -- Remove after 2 seconds
+    task.delay(2, function()
+        errorMsg:Destroy()
+    end)
+end
+end
+
+-- Toggle auto check position
+local function ToggleAutoCheckPosition()
+AutoCheckPosition = not AutoCheckPosition
+
+if AutoCheckPosition then
+    AutoCheckButton.Text = "ON"
+    AutoCheckButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+    
+    -- Get safe position boundaries
+    local verticalMin = tonumber(VerticalMinInput.Text) or -1000
+    local verticalMax = tonumber(VerticalMaxInput.Text) or 1000
+    local horizontalMin = tonumber(HorizontalMinInput.Text) or -1000
+    local horizontalMax = tonumber(HorizontalMaxInput.Text) or 1000
+    
+    SafePositionMin = Vector3.new(horizontalMin, verticalMin, horizontalMin)
+    SafePositionMax = Vector3.new(horizontalMax, verticalMax, horizontalMax)
+    
+    -- Auto check loop
+    local checkConnection = RunService.Heartbeat:Connect(function()
+        if AutoCheckPosition and Character and Character:FindFirstChild("HumanoidRootPart") then
+            local pos = HumanoidRootPart.Position
+            local lastSafePosition = HumanoidRootPart.CFrame
+            
+            -- Check if position is outside safe boundaries
+            if pos.Y < SafePositionMin.Y or pos.Y > SafePositionMax.Y or
+               pos.X < SafePositionMin.X or pos.X > SafePositionMax.X or
+               pos.Z < SafePositionMin.Z or pos.Z > SafePositionMax.Z then
+                
+                -- If we have a saved position, teleport to it
+                if SavedPosition then
+                    HumanoidRootPart.CFrame = SavedPosition
+                else
+                    -- Otherwise, try to move back to a safe position
+                    local safeY = math.clamp(pos.Y, SafePositionMin.Y, SafePositionMax.Y)
+                    local safeX = math.clamp(pos.X, SafePositionMin.X, SafePositionMax.X)
+                    local safeZ = math.clamp(pos.Z, SafePositionMin.Z, SafePositionMax.Z)
+                    
+                    HumanoidRootPart.CFrame = CFrame.new(safeX, safeY, safeZ, HumanoidRootPart.CFrame:GetComponents())
+                end
+            else
+                -- Update last safe position
+                AutoCheckButton.LastSafePosition = lastSafePosition
+            end
+        end
+    end)
+    
+    -- Store connection
+    AutoCheckButton.CheckConnection = checkConnection
+else
+    AutoCheckButton.Text = "OFF"
+    AutoCheckButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    
+    -- Disconnect auto check loop
+    if AutoCheckButton.CheckConnection then
+        AutoCheckButton.CheckConnection:Disconnect()
+        AutoCheckButton.CheckConnection = nil
     end
+end
+end
+
+-- Apply safety settings
+local function ApplySafetySettings()
+-- Get values from inputs
+local verticalMin = tonumber(VerticalMinInput.Text) or -1000
+local verticalMax = tonumber(VerticalMaxInput.Text) or 1000
+local horizontalMin = tonumber(HorizontalMinInput.Text) or -1000
+local horizontalMax = tonumber(HorizontalMaxInput.Text) or 1000
+
+-- Update safe position boundaries
+SafePositionMin = Vector3.new(horizontalMin, verticalMin, horizontalMin)
+SafePositionMax = Vector3.new(horizontalMax, verticalMax, horizontalMax)
+
+-- Show confirmation message
+local confirmMsg = Instance.new("TextLabel")
+confirmMsg.Size = UDim2.new(0.9, 0, 0, 20)
+confirmMsg.Position = UDim2.new(0.05, 0, 0, 270)
+confirmMsg.BackgroundTransparency = 1
+confirmMsg.TextColor3 = Color3.fromRGB(0, 255, 0)
+confirmMsg.TextSize = 12
+confirmMsg.Font = Enum.Font.SourceSans
+confirmMsg.Text = "Settings applied!"
+confirmMsg.Parent = SubMenuContent
+
+-- Remove after 2 seconds
+task.delay(2, function()
+    confirmMsg:Destroy()
+end)
+
+-- If auto check is on, restart it with new settings
+if AutoCheckPosition then
+    if AutoCheckButton.CheckConnection then
+        AutoCheckButton.CheckConnection:Disconnect()
+        AutoCheckButton.CheckConnection = nil
+    end
+    ToggleAutoCheckPosition()
+    ToggleAutoCheckPosition()
+end
+end
+
+-- Toggle submenu
+local function ToggleSubMenu()
+SubMenuVisible = not SubMenuVisible
+SubMenuFrame.Visible = SubMenuVisible
 end
 
 -- Limit dragging to screen bounds
 local function LimitDragging()
-    local screenSize = workspace.CurrentCamera.ViewportSize
-    local frameSize = MainFrame.AbsoluteSize
-    local minX = 0
-    local minY = 0
-    local maxX = screenSize.X - frameSize.X
-    local maxY = screenSize.Y - frameSize.Y
-    
-    local newX = math.clamp(MainFrame.AbsolutePosition.X, minX, maxX)
-    local newY = math.clamp(MainFrame.AbsolutePosition.Y, minY, maxY)
-    
-    if MainFrame.AbsolutePosition.X ~= newX or MainFrame.AbsolutePosition.Y ~= newY then
-        MainFrame.Position = UDim2.new(0, newX, 0, newY)
-    end
+local screenSize = workspace.CurrentCamera.ViewportSize
+local frameSize = MainFrame.AbsoluteSize
+local minX = 0
+local minY = 0
+local maxX = screenSize.X - frameSize.X
+local maxY = screenSize.Y - frameSize.Y
+
+local newX = math.clamp(MainFrame.AbsolutePosition.X, minX, maxX)
+local newY = math.clamp(MainFrame.AbsolutePosition.Y, minY, maxY)
+
+if MainFrame.AbsolutePosition.X ~= newX or MainFrame.AbsolutePosition.Y ~= newY then
+    MainFrame.Position = UDim2.new(0, newX, 0, newY)
+end
 end
 
 local function LimitIconDragging()
-    local screenSize = workspace.CurrentCamera.ViewportSize
-    local iconSize = MinimizedIcon.AbsoluteSize
-    local minX = 0
-    local minY = 0
-    local maxX = screenSize.X - iconSize.X
-    local maxY = screenSize.Y - iconSize.Y
-    
-    local newX = math.clamp(MinimizedIcon.AbsolutePosition.X, minX, maxX)
-    local newY = math.clamp(MinimizedIcon.AbsolutePosition.Y, minY, maxY)
-    
-    if MinimizedIcon.AbsolutePosition.X ~= newX or MinimizedIcon.AbsolutePosition.Y ~= newY then
-        MinimizedIcon.Position = UDim2.new(0, newX, 0, newY)
-    end
+local screenSize = workspace.CurrentCamera.ViewportSize
+local iconSize = MinimizedIcon.AbsoluteSize
+local minX = 0
+local minY = 0
+local maxX = screenSize.X - iconSize.X
+local maxY = screenSize.Y - iconSize.Y
+
+local newX = math.clamp(MinimizedIcon.AbsolutePosition.X, minX, maxX)
+local newY = math.clamp(MinimizedIcon.AbsolutePosition.Y, minY, maxY)
+
+if MinimizedIcon.AbsolutePosition.X ~= newX or MinimizedIcon.AbsolutePosition.Y ~= newY then
+    MinimizedIcon.Position = UDim2.new(0, newX, 0, newY)
+end
+end
+
+local function LimitSubMenuDragging()
+local screenSize = workspace.CurrentCamera.ViewportSize
+local frameSize = SubMenuFrame.AbsoluteSize
+local minX = 0
+local minY = 0
+local maxX = screenSize.X - frameSize.X
+local maxY = screenSize.Y - frameSize.Y
+
+local newX = math.clamp(SubMenuFrame.AbsolutePosition.X, minX, maxX)
+local newY = math.clamp(SubMenuFrame.AbsolutePosition.Y, minY, maxY)
+
+if SubMenuFrame.AbsolutePosition.X ~= newX or SubMenuFrame.AbsolutePosition.Y ~= newY then
+    SubMenuFrame.Position = UDim2.new(0, newX, 0, newY)
+end
 end
 
 -- Event Connections
 CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-    
-    -- Clean up
-    if NoClipping then
-        ToggleNoclip()
-    end
-    if AutoPlatform then
-        TogglePlatform()
-    end
-    if FollowingTarget then
-        ToggleFollowTarget()
-    end
-    if RunningAway then
-        ToggleRunAway()
-    end
+ScreenGui:Destroy()
+
+-- Clean up
+if NoClipping then
+    ToggleNoclip()
+end
+if AutoPlatform then
+    TogglePlatform()
+end
+if FollowingTarget then
+    ToggleFollowTarget()
+end
+if RunningAway then
+    ToggleRunAway()
+end
+if AutoCheckPosition then
+    ToggleAutoCheckPosition()
+end
 end)
 
 MinimizeButton.MouseButton1Click:Connect(function()
-    Minimized = true
-    MainFrame.Visible = false
-    MinimizedIcon.Visible = true
+Minimized = true
+MainFrame.Visible = false
+MinimizedIcon.Visible = true
 end)
 
 MinimizedIcon.MouseButton1Click:Connect(function()
-    Minimized = false
-    MainFrame.Visible = true
-    MinimizedIcon.Visible = false
+Minimized = false
+MainFrame.Visible = true
+MinimizedIcon.Visible = false
 end)
 
--- Make MinimizedIcon draggable
-MinimizedIcon.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local initialPos = MinimizedIcon.Position
-        local mousePos = UserInputService:GetMouseLocation()
-        local offset = UDim2.new(0, mousePos.X - MinimizedIcon.AbsolutePosition.X, 0, mousePos.Y - MinimizedIcon.AbsolutePosition.Y)
-        
-        local connection
-        connection = UserInputService.InputChanged:Connect(function(newInput)
-            if newInput.UserInputType == Enum.UserInputType.MouseMovement then
-                local newPos = UDim2.new(0, newInput.Position.X - offset.X.Offset, 0, newInput.Position.Y - offset.Y.Offset)
-                MinimizedIcon.Position = newPos
-                LimitIconDragging()
-            end
-        end)
-        
-        UserInputService.InputEnded:Connect(function(endInput)
-            if endInput.UserInputType == Enum.UserInputType.MouseButton1 then
-                if connection then
-                    connection:Disconnect()
-                end
-            end
-        end)
-    end
+SubMenuButton.MouseButton1Click:Connect(function()
+ToggleSubMenu()
 end)
 
--- Limit MainFrame dragging
+SubMenuCloseButton.MouseButton1Click:Connect(function()
+SubMenuFrame.Visible = false
+SubMenuVisible = false
+end)
+
+-- Ensure draggable frames stay within screen bounds
 RunService.RenderStepped:Connect(function()
-    if MainFrame.Visible then
-        LimitDragging()
-    end
+if MainFrame.Visible then
+    LimitDragging()
+end
+if MinimizedIcon.Visible then
+    LimitIconDragging()
+end
+if SubMenuFrame.Visible then
+    LimitSubMenuDragging()
+end
 end)
 
 SubmitButton.MouseButton1Click:Connect(function()
-    if KeyInput.Text == KEY then
-        Authenticated = true
-        AuthFrame.Visible = false
-        FeaturesFrame.Visible = true
-        PopulatePlayerList() -- Initialize player list
-    else
-        KeyInput.Text = ""
-        KeyInput.PlaceholderText = "Invalid Key! Try Again..."
-    end
+if KeyInput.Text == KEY then
+    Authenticated = true
+    AuthFrame.Visible = false
+    FeaturesFrame.Visible = true
+    PopulatePlayerList() -- Initialize player list
+else
+    KeyInput.Text = ""
+    KeyInput.PlaceholderText = "Invalid Key! Try Again..."
+end
 end)
 
 TargetDropdown.MouseButton1Click:Connect(function()
-    DropdownFrame.Visible = not DropdownFrame.Visible
+DropdownFrame.Visible = not DropdownFrame.Visible
 end)
 
 ReloadButton.MouseButton1Click:Connect(function()
-    PopulatePlayerList()
+PopulatePlayerList()
 end)
 
 FollowButton.MouseButton1Click:Connect(function()
-    ToggleFollowTarget()
+ToggleFollowTarget()
 end)
 
 NextButton.MouseButton1Click:Connect(function()
-    ToggleAutoNext()
+ToggleAutoNext()
 end)
 
 NoclipButton.MouseButton1Click:Connect(function()
-    ToggleNoclip()
+ToggleNoclip()
 end)
 
 PlatformButton.MouseButton1Click:Connect(function()
-    TogglePlatform()
+TogglePlatform()
 end)
 
 RunButton.MouseButton1Click:Connect(function()
-    ToggleRunAway()
+ToggleRunAway()
+end)
+
+SavePositionButton.MouseButton1Click:Connect(function()
+SaveCurrentPosition()
+end)
+
+TeleportToSavedButton.MouseButton1Click:Connect(function()
+TeleportToSavedPosition()
+end)
+
+AutoCheckButton.MouseButton1Click:Connect(function()
+ToggleAutoCheckPosition()
+end)
+
+ApplySettingsButton.MouseButton1Click:Connect(function()
+ApplySafetySettings()
 end)
 
 -- Distance control buttons
 HorizontalPlus.MouseButton1Click:Connect(function()
-    local currentValue = tonumber(HorizontalInput.Text) or 5
-    HorizontalInput.Text = tostring(currentValue + 0.5)
-    DistanceBehind = currentValue + 0.5
+local currentValue = tonumber(HorizontalInput.Text) or 5
+HorizontalInput.Text = tostring(currentValue + 0.5)
+DistanceBehind = currentValue + 0.5
 end)
 
 HorizontalMinus.MouseButton1Click:Connect(function()
-    local currentValue = tonumber(HorizontalInput.Text) or 5
-    HorizontalInput.Text = tostring(math.max(0, currentValue - 0.5))
-    DistanceBehind = math.max(0, currentValue - 0.5)
+local currentValue = tonumber(HorizontalInput.Text) or 5
+HorizontalInput.Text = tostring(math.max(0, currentValue - 0.5))
+DistanceBehind = math.max(0, currentValue - 0.5)
 end)
 
 VerticalPlus.MouseButton1Click:Connect(function()
-    local currentValue = tonumber(VerticalInput.Text) or 0
-    VerticalInput.Text = tostring(currentValue + 0.5)
-    DistanceAbove = currentValue + 0.5
+local currentValue = tonumber(VerticalInput.Text) or 0
+VerticalInput.Text = tostring(currentValue + 0.5)
+DistanceAbove = currentValue + 0.5
 end)
 
 VerticalMinus.MouseButton1Click:Connect(function()
-    local currentValue = tonumber(VerticalInput.Text) or 0
-    VerticalInput.Text = tostring(currentValue - 0.5)
-    DistanceAbove = currentValue - 0.5
+local currentValue = tonumber(VerticalInput.Text) or 0
+VerticalInput.Text = tostring(currentValue - 0.5)
+DistanceAbove = currentValue - 0.5
 end)
 
 RadiusPlus.MouseButton1Click:Connect(function()
-    local currentValue = tonumber(RadiusInput.Text) or 20
-    RadiusInput.Text = tostring(currentValue + 5)
-    DetectionRadius = currentValue + 5
+local currentValue = tonumber(RadiusInput.Text) or 20
+RadiusInput.Text = tostring(currentValue + 5)
+DetectionRadius = currentValue + 5
 end)
 
 RadiusMinus.MouseButton1Click:Connect(function()
-    local currentValue = tonumber(RadiusInput.Text) or 20
-    RadiusInput.Text = tostring(math.max(5, currentValue - 5))
-    DetectionRadius = math.max(5, currentValue - 5)
+local currentValue = tonumber(RadiusInput.Text) or 20
+RadiusInput.Text = tostring(math.max(5, currentValue - 5))
+DetectionRadius = math.max(5, currentValue - 5)
 end)
 
 -- Checkbox toggles
 AutoNextCheck.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        ToggleAutoNext()
-    end
+if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    ToggleAutoNext()
+end
 end)
 
 AutoPlatformCheck.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        TogglePlatform()
-    end
+if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    TogglePlatform()
+end
 end)
 
 RunAwayCheck.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        ToggleRunAway()
-    end
+if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    ToggleRunAway()
+end
 end)
 
 DeleteButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+ScreenGui:Destroy()
 end)
 
 -- Text input validation
 HorizontalInput.FocusLost:Connect(function()
-    local value = tonumber(HorizontalInput.Text)
-    if value then
-        DistanceBehind = value
-    else
-        HorizontalInput.Text = tostring(DistanceBehind)
-    end
+local value = tonumber(HorizontalInput.Text)
+if value then
+    DistanceBehind = value
+else
+    HorizontalInput.Text = tostring(DistanceBehind)
+end
 end)
 
 VerticalInput.FocusLost:Connect(function()
-    local value = tonumber(VerticalInput.Text)
-    if value then
-        DistanceAbove = value
-    else
-        VerticalInput.Text = tostring(DistanceAbove)
-    end
+local value = tonumber(VerticalInput.Text)
+if value then
+    DistanceAbove = value
+else
+    VerticalInput.Text = tostring(DistanceAbove)
+end
 end)
 
 RadiusInput.FocusLost:Connect(function()
-    local value = tonumber(RadiusInput.Text)
-    if value and value >= 5 then
-        DetectionRadius = value
-    else
-        RadiusInput.Text = tostring(DetectionRadius)
-    end
+local value = tonumber(RadiusInput.Text)
+if value and value >= 5 then
+    DetectionRadius = value
+else
+    RadiusInput.Text = tostring(DetectionRadius)
+end
+end)
+
+-- Safe position input validation
+VerticalMinInput.FocusLost:Connect(function()
+local value = tonumber(VerticalMinInput.Text)
+if value then
+    SafePositionMin = Vector3.new(SafePositionMin.X, value, SafePositionMin.Z)
+else
+    VerticalMinInput.Text = tostring(SafePositionMin.Y)
+end
+end)
+
+VerticalMaxInput.FocusLost:Connect(function()
+local value = tonumber(VerticalMaxInput.Text)
+if value then
+    SafePositionMax = Vector3.new(SafePositionMax.X, value, SafePositionMax.Z)
+else
+    VerticalMaxInput.Text = tostring(SafePositionMax.Y)
+end
+end)
+
+HorizontalMinInput.FocusLost:Connect(function()
+local value = tonumber(HorizontalMinInput.Text)
+if value then
+    SafePositionMin = Vector3.new(value, SafePositionMin.Y, value)
+else
+    HorizontalMinInput.Text = tostring(SafePositionMin.X)
+end
+end)
+
+HorizontalMaxInput.FocusLost:Connect(function()
+local value = tonumber(HorizontalMaxInput.Text)
+if value then
+    SafePositionMax = Vector3.new(value, SafePositionMax.Y, value)
+else
+    HorizontalMaxInput.Text = tostring(SafePositionMax.X)
+end
 end)
 
 -- Check expiration on a timer
 local expirationChecker = task.spawn(function()
-    while task.wait(1) do
-        if CheckExpiration() then
-            break
-        end
+while task.wait(1) do
+    if CheckExpiration() then
+        break
     end
+end
 end)
 
 -- Character respawn handling
 LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-    Character = newCharacter
-    Humanoid = Character:WaitForChild("Humanoid")
-    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+Character = newCharacter
+Humanoid = Character:WaitForChild("Humanoid")
+HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-    -- Reset states if needed
-    if NoClipping then
-        ToggleNoclip()
-        task.wait(0.5)
-        ToggleNoclip()
-    end
-    
-    if AutoPlatform then
-        TogglePlatform()
-        task.wait(0.5)
-        TogglePlatform()
-    end
-    
-    if FollowingTarget then
-        ToggleFollowTarget()
-        task.wait(0.5)
-        ToggleFollowTarget()
-    end
-    
-    if RunningAway then
-        ToggleRunAway()
-        task.wait(0.5)
-        ToggleRunAway()
-    end
+-- Reset states if needed
+if NoClipping then
+    ToggleNoclip()
+    task.wait(0.5)
+    ToggleNoclip()
+end
+
+if AutoPlatform then
+    TogglePlatform()
+    task.wait(0.5)
+    TogglePlatform()
+end
+
+if FollowingTarget then
+    ToggleFollowTarget()
+    task.wait(0.5)
+    ToggleFollowTarget()
+end
+
+if RunningAway then
+    ToggleRunAway()
+    task.wait(0.5)
+    ToggleRunAway()
+end
+
+if AutoCheckPosition then
+    ToggleAutoCheckPosition()
+    task.wait(0.5)
+    ToggleAutoCheckPosition()
+end
 end)
 
 -- Player joining/leaving handling
 Players.PlayerAdded:Connect(function(player)
-    if Authenticated then
-        PopulatePlayerList()
-    end
+if Authenticated then
+    PopulatePlayerList()
+end
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-    if Authenticated then
-        -- Check if removed player was the target
-        if TargetPlayer == player then
-            TargetPlayer = nil
-            TargetDropdown.Text = "Select Target"
-            
-            -- Turn off following if target left
-            if FollowingTarget then
-                ToggleFollowTarget()
-            end
-        end
+if Authenticated then
+    -- Check if removed player was the target
+    if TargetPlayer == player then
+        TargetPlayer = nil
+        TargetDropdown.Text = "Select Target"
         
-        PopulatePlayerList()
+        -- Turn off following if target left
+        if FollowingTarget then
+            ToggleFollowTarget()
+        end
     end
+    
+    PopulatePlayerList()
+end
 end)
 
 -- Start rainbow effect
@@ -1439,3 +2000,4 @@ StartRainbowEffect()
 
 -- Initial expiration check
 CheckExpiration()
+
