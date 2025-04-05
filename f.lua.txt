@@ -1,5 +1,5 @@
 -- Roblox Executor Script
--- Features: Draggable GUI, Minimize, Close, Player Targeting, Teleport, Noclip, Distance Adjustment, Auto Platform, Position Saving
+-- Features: Draggable GUI, Minimize, Close, Player Targeting, Teleport, Noclip, Distance Adjustment, Auto Platform
 
 -- Configuration (EDIT THESE VALUES)
 local KEY = "123456" -- Change this to your desired key
@@ -33,22 +33,11 @@ local AutoPlatform = false
 local RunningAway = false
 local FollowingTarget = false
 local AutoNextTarget = false
-local AutoCheckPosition = false
-local SubMenuVisible = false
 
 -- Distance Settings
 local DistanceBehind = 5
 local DistanceAbove = 0
 local DetectionRadius = 20
-
--- Safe Position Boundaries
-local MinVertical = -1000
-local MaxVertical = 1000
-local MinHorizontal = -1000
-local MaxHorizontal = 1000
-
--- Saved Position
-local SavedPosition = nil
 
 -- Target Variables
 local TargetPlayer = nil
@@ -60,11 +49,11 @@ ScreenGui.Name = "ExecutorGUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Main Frame (reduced height)
+-- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 350, 0, 400) -- Reduced height
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -200)
+MainFrame.Size = UDim2.new(0, 350, 0, 450)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -98,7 +87,7 @@ TitleCorner.Parent = TitleBar
 -- Title
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Size = UDim2.new(1, -90, 1, 0)
+Title.Size = UDim2.new(1, -60, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -107,24 +96,6 @@ Title.Font = Enum.Font.SourceSansBold
 Title.Text = "Roblox Executor"
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleBar
-
--- Submenu Button
-local SubMenuButton = Instance.new("TextButton")
-SubMenuButton.Name = "SubMenuButton"
-SubMenuButton.Size = UDim2.new(0, 30, 0, 30)
-SubMenuButton.Position = UDim2.new(1, -90, 0, 0)
-SubMenuButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-SubMenuButton.BorderSizePixel = 0
-SubMenuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SubMenuButton.TextSize = 16
-SubMenuButton.Font = Enum.Font.SourceSansBold
-SubMenuButton.Text = "≡"
-SubMenuButton.Parent = TitleBar
-
--- Add UICorner for submenu button
-local SubMenuCorner = Instance.new("UICorner")
-SubMenuCorner.CornerRadius = UDim.new(0, 8)
-SubMenuCorner.Parent = SubMenuButton
 
 -- Close Button
 local CloseButton = Instance.new("TextButton")
@@ -248,7 +219,7 @@ FeaturesFrame.BorderSizePixel = 0
 FeaturesFrame.Visible = false
 FeaturesFrame.Parent = ContentFrame
 
--- Create ScrollingFrame for content with increased canvas size
+-- Create ScrollingFrame for content
 local ScrollFrame = Instance.new("ScrollingFrame")
 ScrollFrame.Name = "ScrollFrame"
 ScrollFrame.Size = UDim2.new(1, -10, 1, -10)
@@ -256,7 +227,7 @@ ScrollFrame.Position = UDim2.new(0, 5, 0, 5)
 ScrollFrame.BackgroundTransparency = 1
 ScrollFrame.BorderSizePixel = 0
 ScrollFrame.ScrollBarThickness = 6
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 700) -- Increased canvas size
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 600) -- Will adjust based on content
 ScrollFrame.Parent = FeaturesFrame
 
 -- Create UIListLayout for organized content
@@ -264,63 +235,6 @@ local ListLayout = Instance.new("UIListLayout")
 ListLayout.Padding = UDim.new(0, 10)
 ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 ListLayout.Parent = ScrollFrame
-
--- Section: Position Saving
-local PositionSection = Instance.new("Frame")
-PositionSection.Name = "PositionSection"
-PositionSection.Size = UDim2.new(0.95, 0, 0, 80)
-PositionSection.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-PositionSection.BorderSizePixel = 0
-PositionSection.Parent = ScrollFrame
-
--- Add UICorner for position section
-local PositionSectionCorner = Instance.new("UICorner")
-PositionSectionCorner.CornerRadius = UDim.new(0, 8)
-PositionSectionCorner.Parent = PositionSection
-
-local PositionTitle = Instance.new("TextLabel")
-PositionTitle.Name = "PositionTitle"
-PositionTitle.Size = UDim2.new(1, 0, 0, 30)
-PositionTitle.BackgroundTransparency = 1
-PositionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-PositionTitle.TextSize = 16
-PositionTitle.Font = Enum.Font.SourceSansBold
-PositionTitle.Text = "Position Controls"
-PositionTitle.Parent = PositionSection
-
-local SavePositionButton = Instance.new("TextButton")
-SavePositionButton.Name = "SavePositionButton"
-SavePositionButton.Size = UDim2.new(0.45, 0, 0, 35)
-SavePositionButton.Position = UDim2.new(0.05, 0, 0, 35)
-SavePositionButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-SavePositionButton.BorderSizePixel = 0
-SavePositionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SavePositionButton.TextSize = 14
-SavePositionButton.Font = Enum.Font.SourceSansBold
-SavePositionButton.Text = "Save Position"
-SavePositionButton.Parent = PositionSection
-
--- Add UICorner for save position button
-local SavePositionCorner = Instance.new("UICorner")
-SavePositionCorner.CornerRadius = UDim.new(0, 6)
-SavePositionCorner.Parent = SavePositionButton
-
-local TeleportButton = Instance.new("TextButton")
-TeleportButton.Name = "TeleportButton"
-TeleportButton.Size = UDim2.new(0.45, 0, 0, 35)
-TeleportButton.Position = UDim2.new(0.5, 0, 0, 35)
-TeleportButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-TeleportButton.BorderSizePixel = 0
-TeleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-TeleportButton.TextSize = 14
-TeleportButton.Font = Enum.Font.SourceSansBold
-TeleportButton.Text = "Teleport to Saved"
-TeleportButton.Parent = PositionSection
-
--- Add UICorner for teleport button
-local TeleportCorner = Instance.new("UICorner")
-TeleportCorner.CornerRadius = UDim.new(0, 6)
-TeleportCorner.Parent = TeleportButton
 
 -- Section: Player Targeting
 local TargetSection = Instance.new("Frame")
@@ -571,9 +485,6 @@ VerticalPlus.Position = UDim2.new(0.7, 0, 0, 70)
 VerticalPlus.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 VerticalPlus.BorderSizePixel = 0
 VerticalPlus.TextColor3 = Color3.fromRGB(255, 255, 255)
-VerticalPlus.TextSize = 14
-VerticalPlus.Font = Enum.Font.SourceSansBold
-VerticalPlus.Text = "+"255,255)
 VerticalPlus.TextSize = 14
 VerticalPlus.Font = Enum.Font.SourceSansBold
 VerticalPlus.Text = "+"
@@ -903,290 +814,6 @@ MinimizedIconStroke.Color = Color3.fromRGB(255, 0, 0)
 MinimizedIconStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 MinimizedIconStroke.Parent = MinimizedIcon
 
--- Submenu Frame
-local SubMenuFrame = Instance.new("Frame")
-SubMenuFrame.Name = "SubMenuFrame"
-SubMenuFrame.Size = UDim2.new(0, 250, 0, 300)
-SubMenuFrame.Position = UDim2.new(0, MainFrame.AbsolutePosition.X + MainFrame.AbsoluteSize.X + 10, 0, MainFrame.AbsolutePosition.Y)
-SubMenuFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-SubMenuFrame.BorderSizePixel = 0
-SubMenuFrame.Visible = false
-SubMenuFrame.Active = true
-SubMenuFrame.Parent = ScreenGui
-
--- Add UICorner for submenu frame
-local SubMenuFrameCorner = Instance.new("UICorner")
-SubMenuFrameCorner.CornerRadius = UDim.new(0, 8)
-SubMenuFrameCorner.Parent = SubMenuFrame
-
--- Add UIStroke for submenu frame
-local SubMenuFrameStroke = Instance.new("UIStroke")
-SubMenuFrameStroke.Thickness = 2
-SubMenuFrameStroke.Color = Color3.fromRGB(255, 0, 0)
-SubMenuFrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-SubMenuFrameStroke.Parent = SubMenuFrame
-
--- Submenu Title Bar
-local SubMenuTitleBar = Instance.new("Frame")
-SubMenuTitleBar.Name = "SubMenuTitleBar"
-SubMenuTitleBar.Size = UDim2.new(1, 0, 0, 30)
-SubMenuTitleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-SubMenuTitleBar.BorderSizePixel = 0
-SubMenuTitleBar.Parent = SubMenuFrame
-
--- Add UICorner for submenu title bar
-local SubMenuTitleCorner = Instance.new("UICorner")
-SubMenuTitleCorner.CornerRadius = UDim.new(0, 8)
-SubMenuTitleCorner.Parent = SubMenuTitleBar
-
--- Submenu Title
-local SubMenuTitle = Instance.new("TextLabel")
-SubMenuTitle.Name = "SubMenuTitle"
-SubMenuTitle.Size = UDim2.new(1, -40, 1, 0)
-SubMenuTitle.Position = UDim2.new(0, 10, 0, 0)
-SubMenuTitle.BackgroundTransparency = 1
-SubMenuTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-SubMenuTitle.TextSize = 16
-SubMenuTitle.Font = Enum.Font.SourceSansBold
-SubMenuTitle.Text = "Advanced Settings"
-SubMenuTitle.TextXAlignment = Enum.TextXAlignment.Left
-SubMenuTitle.Parent = SubMenuTitleBar
-
--- Submenu Close Button
-local SubMenuCloseButton = Instance.new("TextButton")
-SubMenuCloseButton.Name = "SubMenuCloseButton"
-SubMenuCloseButton.Size = UDim2.new(0, 30, 0, 30)
-SubMenuCloseButton.Position = UDim2.new(1, -30, 0, 0)
-SubMenuCloseButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-SubMenuCloseButton.BorderSizePixel = 0
-SubMenuCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SubMenuCloseButton.TextSize = 16
-SubMenuCloseButton.Font = Enum.Font.SourceSansBold
-SubMenuCloseButton.Text = "X"
-SubMenuCloseButton.Parent = SubMenuTitleBar
-
--- Add UICorner for submenu close button
-local SubMenuCloseCorner = Instance.new("UICorner")
-SubMenuCloseCorner.CornerRadius = UDim.new(0, 8)
-SubMenuCloseCorner.Parent = SubMenuCloseButton
-
--- Submenu Content
-local SubMenuContent = Instance.new("Frame")
-SubMenuContent.Name = "SubMenuContent"
-SubMenuContent.Size = UDim2.new(1, 0, 1, -30)
-SubMenuContent.Position = UDim2.new(0, 0, 0, 30)
-SubMenuContent.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-SubMenuContent.BorderSizePixel = 0
-SubMenuContent.Parent = SubMenuFrame
-
--- Auto Check Position Section
-local AutoCheckSection = Instance.new("Frame")
-AutoCheckSection.Name = "AutoCheckSection"
-AutoCheckSection.Size = UDim2.new(0.9, 0, 0, 50)
-AutoCheckSection.Position = UDim2.new(0.05, 0, 0, 10)
-AutoCheckSection.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-AutoCheckSection.BorderSizePixel = 0
-AutoCheckSection.Parent = SubMenuContent
-
--- Add UICorner for auto check section
-local AutoCheckSectionCorner = Instance.new("UICorner")
-AutoCheckSectionCorner.CornerRadius = UDim.new(0, 8)
-AutoCheckSectionCorner.Parent = AutoCheckSection
-
--- Auto Check Checkbox
-local AutoCheckBox = Instance.new("Frame")
-AutoCheckBox.Name = "AutoCheckBox"
-AutoCheckBox.Size = UDim2.new(0.06, 0, 0, 20)
-AutoCheckBox.Position = UDim2.new(0.05, 0, 0, 15)
-AutoCheckBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-AutoCheckBox.BorderSizePixel = 0
-AutoCheckBox.Parent = AutoCheckSection
-
--- Add UICorner for auto check box
-local AutoCheckBoxCorner = Instance.new("UICorner")
-AutoCheckBoxCorner.CornerRadius = UDim.new(0, 4)
-AutoCheckBoxCorner.Parent = AutoCheckBox
-
-local AutoCheckLabel = Instance.new("TextLabel")
-AutoCheckLabel.Name = "AutoCheckLabel"
-AutoCheckLabel.Size = UDim2.new(0.8, 0, 1, 0)
-AutoCheckLabel.Position = UDim2.new(0.15, 0, 0, 0)
-AutoCheckLabel.BackgroundTransparency = 1
-AutoCheckLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoCheckLabel.TextSize = 14
-AutoCheckLabel.Font = Enum.Font.SourceSansBold
-AutoCheckLabel.Text = "Auto Check Position"
-AutoCheckLabel.TextXAlignment = Enum.TextXAlignment.Left
-AutoCheckLabel.Parent = AutoCheckSection
-
--- Vertical Boundary Section
-local VerticalBoundarySection = Instance.new("Frame")
-VerticalBoundarySection.Name = "VerticalBoundarySection"
-VerticalBoundarySection.Size = UDim2.new(0.9, 0, 0, 100)
-VerticalBoundarySection.Position = UDim2.new(0.05, 0, 0, 70)
-VerticalBoundarySection.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-VerticalBoundarySection.BorderSizePixel = 0
-VerticalBoundarySection.Parent = SubMenuContent
-
--- Add UICorner for vertical boundary section
-local VerticalBoundarySectionCorner = Instance.new("UICorner")
-VerticalBoundarySectionCorner.CornerRadius = UDim.new(0, 8)
-VerticalBoundarySectionCorner.Parent = VerticalBoundarySection
-
-local VerticalBoundaryTitle = Instance.new("TextLabel")
-VerticalBoundaryTitle.Name = "VerticalBoundaryTitle"
-VerticalBoundaryTitle.Size = UDim2.new(1, 0, 0, 30)
-VerticalBoundaryTitle.BackgroundTransparency = 1
-VerticalBoundaryTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-VerticalBoundaryTitle.TextSize = 14
-VerticalBoundaryTitle.Font = Enum.Font.SourceSansBold
-VerticalBoundaryTitle.Text = "Vertical Boundaries"
-VerticalBoundaryTitle.Parent = VerticalBoundarySection
-
--- Min Vertical Boundary
-local MinVerticalLabel = Instance.new("TextLabel")
-MinVerticalLabel.Name = "MinVerticalLabel"
-MinVerticalLabel.Size = UDim2.new(0.3, 0, 0, 25)
-MinVerticalLabel.Position = UDim2.new(0.05, 0, 0, 35)
-MinVerticalLabel.BackgroundTransparency = 1
-MinVerticalLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinVerticalLabel.TextSize = 14
-MinVerticalLabel.Font = Enum.Font.SourceSans
-MinVerticalLabel.Text = "Min:"
-MinVerticalLabel.TextXAlignment = Enum.TextXAlignment.Left
-MinVerticalLabel.Parent = VerticalBoundarySection
-
-local MinVerticalInput = Instance.new("TextBox")
-MinVerticalInput.Name = "MinVerticalInput"
-MinVerticalInput.Size = UDim2.new(0.4, 0, 0, 25)
-MinVerticalInput.Position = UDim2.new(0.35, 0, 0, 35)
-MinVerticalInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MinVerticalInput.BorderSizePixel = 0
-MinVerticalInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinVerticalInput.TextSize = 14
-MinVerticalInput.Font = Enum.Font.SourceSans
-MinVerticalInput.Text = "-1000"
-MinVerticalInput.Parent = VerticalBoundarySection
-
--- Add UICorner for min vertical input
-local MinVerticalInputCorner = Instance.new("UICorner")
-MinVerticalInputCorner.CornerRadius = UDim.new(0, 6)
-MinVerticalInputCorner.Parent = MinVerticalInput
-
--- Max Vertical Boundary
-local MaxVerticalLabel = Instance.new("TextLabel")
-MaxVerticalLabel.Name = "MaxVerticalLabel"
-MaxVerticalLabel.Size = UDim2.new(0.3, 0, 0, 25)
-MaxVerticalLabel.Position = UDim2.new(0.05, 0, 0, 70)
-MaxVerticalLabel.BackgroundTransparency = 1
-MaxVerticalLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-MaxVerticalLabel.TextSize = 14
-MaxVerticalLabel.Font = Enum.Font.SourceSans
-MaxVerticalLabel.Text = "Max:"
-MaxVerticalLabel.TextXAlignment = Enum.TextXAlignment.Left
-MaxVerticalLabel.Parent = VerticalBoundarySection
-
-local MaxVerticalInput = Instance.new("TextBox")
-MaxVerticalInput.Name = "MaxVerticalInput"
-MaxVerticalInput.Size = UDim2.new(0.4, 0, 0, 25)
-MaxVerticalInput.Position = UDim2.new(0.35, 0, 0, 70)
-MaxVerticalInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MaxVerticalInput.BorderSizePixel = 0
-MaxVerticalInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-MaxVerticalInput.TextSize = 14
-MaxVerticalInput.Font = Enum.Font.SourceSans
-MaxVerticalInput.Text = "1000"
-MaxVerticalInput.Parent = VerticalBoundarySection
-
--- Add UICorner for max vertical input
-local MaxVerticalInputCorner = Instance.new("UICorner")
-MaxVerticalInputCorner.CornerRadius = UDim.new(0, 6)
-MaxVerticalInputCorner.Parent = MaxVerticalInput
-
--- Horizontal Boundary Section
-local HorizontalBoundarySection = Instance.new("Frame")
-HorizontalBoundarySection.Name = "HorizontalBoundarySection"
-HorizontalBoundarySection.Size = UDim2.new(0.9, 0, 0, 100)
-HorizontalBoundarySection.Position = UDim2.new(0.05, 0, 0, 180)
-HorizontalBoundarySection.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-HorizontalBoundarySection.BorderSizePixel = 0
-HorizontalBoundarySection.Parent = SubMenuContent
-
--- Add UICorner for horizontal boundary section
-local HorizontalBoundarySectionCorner = Instance.new("UICorner")
-HorizontalBoundarySectionCorner.CornerRadius = UDim.new(0, 8)
-HorizontalBoundarySectionCorner.Parent = HorizontalBoundarySection
-
-local HorizontalBoundaryTitle = Instance.new("TextLabel")
-HorizontalBoundaryTitle.Name = "HorizontalBoundaryTitle"
-HorizontalBoundaryTitle.Size = UDim2.new(1, 0, 0, 30)
-HorizontalBoundaryTitle.BackgroundTransparency = 1
-HorizontalBoundaryTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-HorizontalBoundaryTitle.TextSize = 14
-HorizontalBoundaryTitle.Font = Enum.Font.SourceSansBold
-HorizontalBoundaryTitle.Text = "Horizontal Boundaries"
-HorizontalBoundaryTitle.Parent = HorizontalBoundarySection
-
--- Min Horizontal Boundary
-local MinHorizontalLabel = Instance.new("TextLabel")
-MinHorizontalLabel.Name = "MinHorizontalLabel"
-MinHorizontalLabel.Size = UDim2.new(0.3, 0, 0, 25)
-MinHorizontalLabel.Position = UDim2.new(0.05, 0, 0, 35)
-MinHorizontalLabel.BackgroundTransparency = 1
-MinHorizontalLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinHorizontalLabel.TextSize = 14
-MinHorizontalLabel.Font = Enum.Font.SourceSans
-MinHorizontalLabel.Text = "Min:"
-MinHorizontalLabel.TextXAlignment = Enum.TextXAlignment.Left
-MinHorizontalLabel.Parent = HorizontalBoundarySection
-
-local MinHorizontalInput = Instance.new("TextBox")
-MinHorizontalInput.Name = "MinHorizontalInput"
-MinHorizontalInput.Size = UDim2.new(0.4, 0, 0, 25)
-MinHorizontalInput.Position = UDim2.new(0.35, 0, 0, 35)
-MinHorizontalInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MinHorizontalInput.BorderSizePixel = 0
-MinHorizontalInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinHorizontalInput.TextSize = 14
-MinHorizontalInput.Font = Enum.Font.SourceSans
-MinHorizontalInput.Text = "-1000"
-MinHorizontalInput.Parent = HorizontalBoundarySection
-
--- Add UICorner for min horizontal input
-local MinHorizontalInputCorner = Instance.new("UICorner")
-MinHorizontalInputCorner.CornerRadius = UDim.new(0, 6)
-MinHorizontalInputCorner.Parent = MinHorizontalInput
-
--- Max Horizontal Boundary
-local MaxHorizontalLabel = Instance.new("TextLabel")
-MaxHorizontalLabel.Name = "MaxHorizontalLabel"
-MaxHorizontalLabel.Size = UDim2.new(0.3, 0, 0, 25)
-MaxHorizontalLabel.Position = UDim2.new(0.05, 0, 0, 70)
-MaxHorizontalLabel.BackgroundTransparency = 1
-MaxHorizontalLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-MaxHorizontalLabel.TextSize = 14
-MaxHorizontalLabel.Font = Enum.Font.SourceSans
-MaxHorizontalLabel.Text = "Max:"
-MaxHorizontalLabel.TextXAlignment = Enum.TextXAlignment.Left
-MaxHorizontalLabel.Parent = HorizontalBoundarySection
-
-local MaxHorizontalInput = Instance.new("TextBox")
-MaxHorizontalInput.Name = "MaxHorizontalInput"
-MaxHorizontalInput.Size = UDim2.new(0.4, 0, 0, 25)
-MaxHorizontalInput.Position = UDim2.new(0.35, 0, 0, 70)
-MaxHorizontalInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MaxHorizontalInput.BorderSizePixel = 0
-MaxHorizontalInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-MaxHorizontalInput.TextSize = 14
-MaxHorizontalInput.Font = Enum.Font.SourceSans
-MaxHorizontalInput.Text = "1000"
-MaxHorizontalInput.Parent = HorizontalBoundarySection
-
--- Add UICorner for max horizontal input
-local MaxHorizontalInputCorner = Instance.new("UICorner")
-MaxHorizontalInputCorner.CornerRadius = UDim.new(0, 6)
-MaxHorizontalInputCorner.Parent = MaxHorizontalInput
-
 -- Functions
 local function CheckExpiration()
     local currentTime = os.time()
@@ -1240,11 +867,9 @@ local function StartRainbowEffect()
             
             local mainTween = TweenService:Create(MainStroke, tweenInfo, {Color = targetColor})
             local iconTween = TweenService:Create(MinimizedIconStroke, tweenInfo, {Color = targetColor})
-            local subMenuTween = TweenService:Create(SubMenuFrameStroke, tweenInfo, {Color = targetColor})
             
             mainTween:Play()
             iconTween:Play()
-            subMenuTween:Play()
             
             index = (index % #colors) + 1
             wait(0.5)
@@ -1519,83 +1144,6 @@ local function ToggleAutoNext()
     end
 end
 
--- Save current position
-local function SaveCurrentPosition()
-    if Character and Character:FindFirstChild("HumanoidRootPart") then
-        SavedPosition = HumanoidRootPart.CFrame
-        SavePositionButton.Text = "Position Saved!"
-        
-        -- Reset text after 2 seconds
-        spawn(function()
-            wait(2)
-            SavePositionButton.Text = "Save Position"
-        end)
-    end
-end
-
--- Teleport to saved position
-local function TeleportToSavedPosition()
-    if SavedPosition and Character and Character:FindFirstChild("HumanoidRootPart") then
-        HumanoidRootPart.CFrame = SavedPosition
-        TeleportButton.Text = "Teleported!"
-        
-        -- Reset text after 2 seconds
-        spawn(function()
-            wait(2)
-            TeleportButton.Text = "Teleport to Saved"
-        end)
-    else
-        TeleportButton.Text = "No Position Saved!"
-        
-        -- Reset text after 2 seconds
-        spawn(function()
-            wait(2)
-            TeleportButton.Text = "Teleport to Saved"
-        end)
-    end
-end
-
--- Toggle auto check position
-local function ToggleAutoCheckPosition()
-    AutoCheckPosition = not AutoCheckPosition
-    
-    if AutoCheckPosition then
-        AutoCheckBox.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        
-        -- Get boundary values
-        MinVertical = tonumber(MinVerticalInput.Text) or -1000
-        MaxVertical = tonumber(MaxVerticalInput.Text) or 1000
-        MinHorizontal = tonumber(MinHorizontalInput.Text) or -1000
-        MaxHorizontal = tonumber(MaxHorizontalInput.Text) or 1000
-        
-        -- Auto check loop
-        local checkConnection = RunService.Heartbeat:Connect(function()
-            if AutoCheckPosition and Character and Character:FindFirstChild("HumanoidRootPart") and SavedPosition then
-                local pos = HumanoidRootPart.Position
-                
-                -- Check if outside boundaries
-                if pos.Y < MinVertical or pos.Y > MaxVertical or 
-                   pos.X < MinHorizontal or pos.X > MaxHorizontal or
-                   pos.Z < MinHorizontal or pos.Z > MaxHorizontal then
-                    -- Teleport back to saved position
-                    HumanoidRootPart.CFrame = SavedPosition
-                end
-            end
-        end)
-        
-        -- Store connection
-        AutoCheckBox.CheckConnection = checkConnection
-    else
-        AutoCheckBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        
-        -- Disconnect check loop
-        if AutoCheckBox.CheckConnection then
-            AutoCheckBox.CheckConnection:Disconnect()
-            AutoCheckBox.CheckConnection = nil
-        end
-    end
-end
-
 -- Limit dragging to screen bounds
 local function LimitDragging()
     local screenSize = workspace.CurrentCamera.ViewportSize
@@ -1629,36 +1177,6 @@ local function LimitIconDragging()
     end
 end
 
-local function LimitSubMenuDragging()
-    local screenSize = workspace.CurrentCamera.ViewportSize
-    local frameSize = SubMenuFrame.AbsoluteSize
-    local minX = 0
-    local minY = 0
-    local maxX = screenSize.X - frameSize.X
-    local maxY = screenSize.Y - frameSize.Y
-    
-    local newX = math.clamp(SubMenuFrame.AbsolutePosition.X, minX, maxX)
-    local newY = math.clamp(SubMenuFrame.AbsolutePosition.Y, minY, maxY)
-    
-    if SubMenuFrame.AbsolutePosition.X ~= newX or SubMenuFrame.AbsolutePosition.Y ~= newY then
-        SubMenuFrame.Position = UDim2.new(0, newX, 0, newY)
-    end
-end
-
--- Toggle submenu
-local function ToggleSubMenu()
-    SubMenuVisible = not SubMenuVisible
-    SubMenuFrame.Visible = SubMenuVisible
-    
-    if SubMenuVisible then
-        -- Position submenu next to main frame
-        local mainFramePos = MainFrame.AbsolutePosition
-        local mainFrameSize = MainFrame.AbsoluteSize
-        SubMenuFrame.Position = UDim2.new(0, mainFramePos.X + mainFrameSize.X + 10, 0, mainFramePos.Y)
-        LimitSubMenuDragging()
-    end
-end
-
 -- Event Connections
 CloseButton.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
@@ -1676,32 +1194,18 @@ CloseButton.MouseButton1Click:Connect(function()
     if RunningAway then
         ToggleRunAway()
     end
-    if AutoCheckPosition then
-        ToggleAutoCheckPosition()
-    end
 end)
 
 MinimizeButton.MouseButton1Click:Connect(function()
     Minimized = true
     MainFrame.Visible = false
     MinimizedIcon.Visible = true
-    SubMenuFrame.Visible = false
-    SubMenuVisible = false
 end)
 
 MinimizedIcon.MouseButton1Click:Connect(function()
     Minimized = false
     MainFrame.Visible = true
     MinimizedIcon.Visible = false
-end)
-
-SubMenuButton.MouseButton1Click:Connect(function()
-    ToggleSubMenu()
-end)
-
-SubMenuCloseButton.MouseButton1Click:Connect(function()
-    SubMenuVisible = false
-    SubMenuFrame.Visible = false
 end)
 
 -- Make MinimizedIcon draggable
@@ -1730,39 +1234,10 @@ MinimizedIcon.InputBegan:Connect(function(input)
     end
 end)
 
--- Make SubMenuFrame draggable
-SubMenuTitleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local initialPos = SubMenuFrame.Position
-        local mousePos = UserInputService:GetMouseLocation()
-        local offset = UDim2.new(0, mousePos.X - SubMenuFrame.AbsolutePosition.X, 0, mousePos.Y - SubMenuFrame.AbsolutePosition.Y)
-        
-        local connection
-        connection = UserInputService.InputChanged:Connect(function(newInput)
-            if newInput.UserInputType == Enum.UserInputType.MouseMovement then
-                local newPos = UDim2.new(0, newInput.Position.X - offset.X.Offset, 0, newInput.Position.Y - offset.Y.Offset)
-                SubMenuFrame.Position = newPos
-                LimitSubMenuDragging()
-            end
-        end)
-        
-        UserInputService.InputEnded:Connect(function(endInput)
-            if endInput.UserInputType == Enum.UserInputType.MouseButton1 then
-                if connection then
-                    connection:Disconnect()
-                end
-            end
-        end)
-    end
-end)
-
 -- Limit MainFrame dragging
 RunService.RenderStepped:Connect(function()
     if MainFrame.Visible then
         LimitDragging()
-    end
-    if SubMenuFrame.Visible then
-        LimitSubMenuDragging()
     end
 end)
 
@@ -1806,20 +1281,6 @@ RunButton.MouseButton1Click:Connect(function()
     ToggleRunAway()
 end)
 
-SavePositionButton.MouseButton1Click:Connect(function()
-    SaveCurrentPosition()
-end)
-
-TeleportButton.MouseButton1Click:Connect(function()
-    TeleportToSavedPosition()
-end)
-
-AutoCheckBox.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        ToggleAutoCheckPosition()
-    end
-end)
-
 -- Distance control buttons
 HorizontalPlus.MouseButton1Click:Connect(function()
     local currentValue = tonumber(HorizontalInput.Text) or 5
@@ -1842,8 +1303,6 @@ end)
 VerticalMinus.MouseButton1Click:Connect(function()
     local currentValue = tonumber(VerticalInput.Text) or 0
     VerticalInput.Text = tostring(currentValue - 0.5)
-    DistanceAbove = currentValue - 0  or 0
-    VerticalInput.Text = tostring(currentValue - 0.5)
     DistanceAbove = currentValue - 0.5
 end)
 
@@ -1857,63 +1316,6 @@ RadiusMinus.MouseButton1Click:Connect(function()
     local currentValue = tonumber(RadiusInput.Text) or 20
     RadiusInput.Text = tostring(math.max(5, currentValue - 5))
     DetectionRadius = math.max(5, currentValue - 5)
-end)
-
--- Boundary input validation
-MinVerticalInput.FocusLost:Connect(function()
-    local value = tonumber(MinVerticalInput.Text)
-    if value then
-        MinVertical = value
-    else
-        MinVerticalInput.Text = tostring(MinVertical)
-    end
-    
-    if AutoCheckPosition then
-        ToggleAutoCheckPosition()
-        ToggleAutoCheckPosition()
-    end
-end)
-
-MaxVerticalInput.FocusLost:Connect(function()
-    local value = tonumber(MaxVerticalInput.Text)
-    if value then
-        MaxVertical = value
-    else
-        MaxVerticalInput.Text = tostring(MaxVertical)
-    end
-    
-    if AutoCheckPosition then
-        ToggleAutoCheckPosition()
-        ToggleAutoCheckPosition()
-    end
-end)
-
-MinHorizontalInput.FocusLost:Connect(function()
-    local value = tonumber(MinHorizontalInput.Text)
-    if value then
-        MinHorizontal = value
-    else
-        MinHorizontalInput.Text = tostring(MinHorizontal)
-    end
-    
-    if AutoCheckPosition then
-        ToggleAutoCheckPosition()
-        ToggleAutoCheckPosition()
-    end
-end)
-
-MaxHorizontalInput.FocusLost:Connect(function()
-    local value = tonumber(MaxHorizontalInput.Text)
-    if value then
-        MaxHorizontal = value
-    else
-        MaxHorizontalInput.Text = tostring(MaxHorizontal)
-    end
-    
-    if AutoCheckPosition then
-        ToggleAutoCheckPosition()
-        ToggleAutoCheckPosition()
-    end
 end)
 
 -- Checkbox toggles
@@ -2005,12 +1407,6 @@ LocalPlayer.CharacterAdded:Connect(function(newCharacter)
         ToggleRunAway()
         task.wait(0.5)
         ToggleRunAway()
-    end
-    
-    if AutoCheckPosition and SavedPosition then
-        ToggleAutoCheckPosition()
-        task.wait(0.5)
-        ToggleAutoCheckPosition()
     end
 end)
 
