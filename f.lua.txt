@@ -35,6 +35,11 @@ local FollowingTarget = false
 local AutoNextTarget = false
 local AutoCheckPosition = false
 local SubMenuVisible = false
+local LookingAtPlayer = false
+local LookTarget = nil
+local LookBodyPart = "Head"
+local BodyParts = {"Head", "UpperTorso", "HumanoidRootPart", "LeftFoot", "RightFoot"}
+local BodyPartIndex = 1
 
 -- Distance Settings
 local DistanceBehind = 5
@@ -255,7 +260,7 @@ ScrollFrame.Position = UDim2.new(0, 5, 0, 5)
 ScrollFrame.BackgroundTransparency = 1
 ScrollFrame.BorderSizePixel = 0
 ScrollFrame.ScrollBarThickness = 6
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 850) -- Increased canvas size for more scrolling space
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 950) -- Increased canvas size for more scrolling space
 ScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y -- Automatically adjust canvas size based on content
 ScrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y -- Only allow vertical scrolling
 ScrollFrame.ScrollingEnabled = true -- Ensure scrolling is enabled
@@ -847,6 +852,114 @@ ExpirationLabel.Font = Enum.Font.SourceSans
 ExpirationLabel.Text = "Expires: Loading..."
 ExpirationLabel.Parent = ExpirationSection
 
+-- Section: Look At Player
+local LookAtSection = Instance.new("Frame")
+LookAtSection.Name = "LookAtSection"
+LookAtSection.Size = UDim2.new(0.95, 0, 0, 180)
+LookAtSection.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+LookAtSection.BorderSizePixel = 0
+LookAtSection.Parent = ScrollFrame
+
+-- Add UICorner for look at section
+local LookAtSectionCorner = Instance.new("UICorner")
+LookAtSectionCorner.CornerRadius = UDim.new(0, 8)
+LookAtSectionCorner.Parent = LookAtSection
+
+local LookAtTitle = Instance.new("TextLabel")
+LookAtTitle.Name = "LookAtTitle"
+LookAtTitle.Size = UDim2.new(1, 0, 0, 30)
+LookAtTitle.BackgroundTransparency = 1
+LookAtTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+LookAtTitle.TextSize = 16
+LookAtTitle.Font = Enum.Font.SourceSansBold
+LookAtTitle.Text = "Look At Player"
+LookAtTitle.Parent = LookAtSection
+
+-- Look At Toggle Button
+local LookAtButton = Instance.new("TextButton")
+LookAtButton.Name = "LookAtButton"
+LookAtButton.Size = UDim2.new(0.45, 0, 0, 35)
+LookAtButton.Position = UDim2.new(0.05, 0, 0, 35)
+LookAtButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+LookAtButton.BorderSizePixel = 0
+LookAtButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LookAtButton.TextSize = 14
+LookAtButton.Font = Enum.Font.SourceSansBold
+LookAtButton.Text = "Look At: OFF"
+LookAtButton.Parent = LookAtSection
+
+-- Add UICorner for look at button
+local LookAtCorner = Instance.new("UICorner")
+LookAtCorner.CornerRadius = UDim.new(0, 6)
+LookAtCorner.Parent = LookAtButton
+
+-- Body Part Button
+local BodyPartButton = Instance.new("TextButton")
+BodyPartButton.Name = "BodyPartButton"
+BodyPartButton.Size = UDim2.new(0.45, 0, 0, 35)
+BodyPartButton.Position = UDim2.new(0.5, 0, 0, 35)
+BodyPartButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+BodyPartButton.BorderSizePixel = 0
+BodyPartButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+BodyPartButton.TextSize = 14
+BodyPartButton.Font = Enum.Font.SourceSansBold
+BodyPartButton.Text = "Part: Head"
+BodyPartButton.Parent = LookAtSection
+
+-- Add UICorner for body part button
+local BodyPartCorner = Instance.new("UICorner")
+BodyPartCorner.CornerRadius = UDim.new(0, 6)
+BodyPartCorner.Parent = BodyPartButton
+
+-- Nearest Player Button
+local NearestPlayerButton = Instance.new("TextButton")
+NearestPlayerButton.Name = "NearestPlayerButton"
+NearestPlayerButton.Size = UDim2.new(0.45, 0, 0, 35)
+NearestPlayerButton.Position = UDim2.new(0.05, 0, 0, 80)
+NearestPlayerButton.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+NearestPlayerButton.BorderSizePixel = 0
+NearestPlayerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+NearestPlayerButton.TextSize = 14
+NearestPlayerButton.Font = Enum.Font.SourceSansBold
+NearestPlayerButton.Text = "Select Nearest"
+NearestPlayerButton.Parent = LookAtSection
+
+-- Add UICorner for nearest player button
+local NearestPlayerCorner = Instance.new("UICorner")
+NearestPlayerCorner.CornerRadius = UDim.new(0, 6)
+NearestPlayerCorner.Parent = NearestPlayerButton
+
+-- Teleport Behind Button
+local TeleportBehindButton = Instance.new("TextButton")
+TeleportBehindButton.Name = "TeleportBehindButton"
+TeleportBehindButton.Size = UDim2.new(0.45, 0, 0, 35)
+TeleportBehindButton.Position = UDim2.new(0.5, 0, 0, 80)
+TeleportBehindButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+TeleportBehindButton.BorderSizePixel = 0
+TeleportBehindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportBehindButton.TextSize = 14
+TeleportBehindButton.Font = Enum.Font.SourceSansBold
+TeleportBehindButton.Text = "Teleport Behind"
+TeleportBehindButton.Parent = LookAtSection
+
+-- Add UICorner for teleport behind button
+local TeleportBehindCorner = Instance.new("UICorner")
+TeleportBehindCorner.CornerRadius = UDim.new(0, 6)
+TeleportBehindCorner.Parent = TeleportBehindButton
+
+-- Current Target Label
+local CurrentTargetLabel = Instance.new("TextLabel")
+CurrentTargetLabel.Name = "CurrentTargetLabel"
+CurrentTargetLabel.Size = UDim2.new(0.9, 0, 0, 25)
+CurrentTargetLabel.Position = UDim2.new(0.05, 0, 0, 125)
+CurrentTargetLabel.BackgroundTransparency = 1
+CurrentTargetLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+CurrentTargetLabel.TextSize = 14
+CurrentTargetLabel.Font = Enum.Font.SourceSans
+CurrentTargetLabel.Text = "Current Target: None"
+CurrentTargetLabel.TextXAlignment = Enum.TextXAlignment.Left
+CurrentTargetLabel.Parent = LookAtSection
+
 -- Expired Frame (Hidden until expired)
 local ExpiredFrame = Instance.new("Frame")
 ExpiredFrame.Name = "ExpiredFrame"
@@ -1257,6 +1370,10 @@ for _, player in pairs(Players:GetPlayers()) do
             TargetPlayer = player
             TargetDropdown.Text = player.Name
             DropdownFrame.Visible = false
+            
+            -- Also set as look target
+            LookTarget = player
+            CurrentTargetLabel.Text = "Current Target: " .. player.Name
         end)
     end
 end
@@ -1687,6 +1804,87 @@ if SubMenuFrame.AbsolutePosition.X ~= newX or SubMenuFrame.AbsolutePosition.Y ~=
 end
 end
 
+-- Function to find the nearest player
+local function GetNearestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+    
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (player.Character.HumanoidRootPart.Position - Character.HumanoidRootPart.Position).Magnitude
+            if distance < shortestDistance then
+                closestPlayer = player
+                shortestDistance = distance
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- Toggle look at player function
+local function ToggleLookAtPlayer()
+    LookingAtPlayer = not LookingAtPlayer
+    
+    if LookingAtPlayer then
+        LookAtButton.Text = "Look At: ON"
+        LookAtButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+        
+        -- Create look at connection
+        local lookConnection = RunService.RenderStepped:Connect(function()
+            if LookingAtPlayer and LookTarget and LookTarget.Character and LookTarget.Character:FindFirstChild(LookBodyPart) and Camera then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, LookTarget.Character[LookBodyPart].Position)
+            end
+        end)
+        
+        -- Store connection
+        LookAtButton.LookConnection = lookConnection
+    else
+        LookAtButton.Text = "Look At: OFF"
+        LookAtButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+        
+        -- Disconnect look connection
+        if LookAtButton.LookConnection then
+            LookAtButton.LookConnection:Disconnect()
+            LookAtButton.LookConnection = nil
+        end
+    end
+end
+
+-- Cycle through body parts
+local function CycleBodyPart()
+    BodyPartIndex = (BodyPartIndex % #BodyParts) + 1
+    LookBodyPart = BodyParts[BodyPartIndex]
+    BodyPartButton.Text = "Part: " .. LookBodyPart
+end
+
+-- Teleport behind target
+local function TeleportBehindTarget()
+    if LookTarget and LookTarget.Character and LookTarget.Character:FindFirstChild("HumanoidRootPart") and Character and Character:FindFirstChild("HumanoidRootPart") then
+        local targetHRP = LookTarget.Character.HumanoidRootPart
+        local lookVector = targetHRP.CFrame.LookVector
+        local teleportPosition = targetHRP.Position - (lookVector * 3)
+        
+        -- Teleport behind target
+        HumanoidRootPart.CFrame = CFrame.new(teleportPosition, targetHRP.Position)
+    else
+        -- Show error message
+        local errorMsg = Instance.new("TextLabel")
+        errorMsg.Size = UDim2.new(0.9, 0, 0, 20)
+        errorMsg.Position = UDim2.new(0.05, 0, 0, 155)
+        errorMsg.BackgroundTransparency = 1
+        errorMsg.TextColor3 = Color3.fromRGB(255, 0, 0)
+        errorMsg.TextSize = 12
+        errorMsg.Font = Enum.Font.SourceSans
+        errorMsg.Text = "No target selected!"
+        errorMsg.Parent = LookAtSection
+        
+        -- Remove after 2 seconds
+        task.delay(2, function()
+            errorMsg:Destroy()
+        end)
+    end
+end
+
 -- Event Connections
 CloseButton.MouseButton1Click:Connect(function()
 ScreenGui:Destroy()
@@ -1706,6 +1904,9 @@ if RunningAway then
 end
 if AutoCheckPosition then
     ToggleAutoCheckPosition()
+end
+if LookingAtPlayer then
+    ToggleLookAtPlayer()
 end
 end)
 
@@ -1924,6 +2125,30 @@ else
 end
 end)
 
+-- Look At Player button
+LookAtButton.MouseButton1Click:Connect(function()
+    ToggleLookAtPlayer()
+end)
+
+-- Body Part button
+BodyPartButton.MouseButton1Click:Connect(function()
+    CycleBodyPart()
+end)
+
+-- Nearest Player button
+NearestPlayerButton.MouseButton1Click:Connect(function()
+    local nearestPlayer = GetNearestPlayer()
+    if nearestPlayer then
+        LookTarget = nearestPlayer
+        CurrentTargetLabel.Text = "Current Target: " .. nearestPlayer.Name
+    end
+end)
+
+-- Teleport Behind button
+TeleportBehindButton.MouseButton1Click:Connect(function()
+    TeleportBehindTarget()
+end)
+
 -- Check expiration on a timer
 local expirationChecker = task.spawn(function()
 while task.wait(1) do
@@ -1968,6 +2193,13 @@ if AutoCheckPosition then
     ToggleAutoCheckPosition()
     task.wait(0.5)
     ToggleAutoCheckPosition()
+end
+
+-- Reset look at player if needed
+if LookingAtPlayer then
+    ToggleLookAtPlayer()
+    task.wait(0.5)
+    ToggleLookAtPlayer()
 end
 end)
 
