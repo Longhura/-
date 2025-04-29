@@ -1,275 +1,270 @@
-
--- Self-defending code
-local _integrity_key = "1iLttqp3R85x1e6nfM9z"
-local _script_content = [=[--[[ Obfuscated with Roblox Script Obfuscator Pro v2.0 | 2025-04-29T15:17:32.820Z ]]
-
 -- Roblox Executor Script with Fly, NoClip, and Speed Walking
-local _WI30 = game:GetService("_WI30")
-local _UyY1 = game:GetService("_UyY1")
-local _jHv2 = game:GetService("_jHv2")
-local _lDM3 = game:GetService("_lDM3")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
--- Create _VNf4 GUI
-local _VNf4 = Instance.new("ScreenGui")
-local _fvy5 = Instance.new("Frame")
-local _FP66 = Instance.new("TextLabel")
+-- Create main GUI
+local main = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
 
 -- Create fly GUI elements
-local _wZe7 = Instance.new("Frame")
-local _Cqa8 = Instance.new("TextButton")
-local _mqt9 = Instance.new("TextButton")
-local _Rcf10 = Instance.new("TextButton")
-local _Epo11 = Instance.new("TextLabel")
-local _sd412 = Instance.new("TextButton")
-local _oJw13 = Instance.new("TextLabel")
-local _pVV14 = Instance.new("TextButton")
+local FlyFrame = Instance.new("Frame")
+local up = Instance.new("TextButton")
+local down = Instance.new("TextButton")
+local onof = Instance.new("TextButton")
+local FlyLabel = Instance.new("TextLabel")
+local plus = Instance.new("TextButton")
+local speed = Instance.new("TextLabel")
+local mine = Instance.new("TextButton")
 
 -- Create control buttons
-local _Njo15 = Instance.new("TextButton")
-local _Dyg16 = Instance.new("TextButton")
-local _Wsp17 = Instance.new("TextBox")
-local _Nk_18 = Instance.new("TextLabel")
-local _KDS19 = Instance.new("TextButton")
-local _CWS20 = Instance.new("TextButton")
-local _O8T21 = Instance.new("TextButton")
+local NoClipButton = Instance.new("TextButton")
+local SpeedWalkButton = Instance.new("TextButton")
+local SpeedInput = Instance.new("TextBox")
+local SpeedLabel = Instance.new("TextLabel")
+local closebutton = Instance.new("TextButton")
+local mini = Instance.new("TextButton")
+local mini2 = Instance.new("TextButton")
 
--- Setup _VNf4 GUI
-_VNf4.Name = "ExecutorGUI"
-_VNf4.Parent = game._WI30.LocalPlayer:WaitForChild("PlayerGui")
-_VNf4.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-_VNf4.ResetOnSpawn = false
+-- Setup main GUI
+main.Name = "ExecutorGUI"
+main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+main.ResetOnSpawn = false
 
--- Setup _VNf4 frame
-_fvy5.Name = "_fvy5"
-_fvy5.Parent = _VNf4
-_fvy5.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
-_fvy5.BorderColor3 = Color3.fromRGB(103, 221, 213)
-_fvy5.Position = UDim2.new(0.05, 0, 0.05, 0)
-_fvy5.Size = UDim2.new(0, 250, 0, 200)
-_fvy5.Active = true
-_fvy5.Draggable = true
+-- Setup main frame
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = main
+MainFrame.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
+MainFrame.BorderColor3 = Color3.fromRGB(103, 221, 213)
+MainFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
+MainFrame.Size = UDim2.new(0, 250, 0, 200)
+MainFrame.Active = true
+MainFrame.Draggable = true
 
 -- Setup title
-_FP66.Name = "_FP66"
-_FP66.Parent = _fvy5
-_FP66.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
-_FP66.Size = UDim2.new(1, 0, 0, 30)
-_FP66.Font = Enum.Font.SourceSansBold
-_FP66.Text = "Roblox Executor"
-_FP66.TextColor3 = Color3.fromRGB(0, 0, 0)
-_FP66.TextSize = 18
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "Roblox Executor"
+Title.TextColor3 = Color3.fromRGB(0, 0, 0)
+Title.TextSize = 18
 
 -- Setup NoClip button
-_Njo15.Name = "_Njo15"
-_Njo15.Parent = _fvy5
-_Njo15.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
-_Njo15.Position = UDim2.new(0.05, 0, 0.2, 0)
-_Njo15.Size = UDim2.new(0.9, 0, 0, 30)
-_Njo15.Font = Enum.Font.SourceSansBold
-_Njo15.Text = "NoClip: OFF"
-_Njo15.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Njo15.TextSize = 16
+NoClipButton.Name = "NoClipButton"
+NoClipButton.Parent = MainFrame
+NoClipButton.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
+NoClipButton.Position = UDim2.new(0.05, 0, 0.2, 0)
+NoClipButton.Size = UDim2.new(0.9, 0, 0, 30)
+NoClipButton.Font = Enum.Font.SourceSansBold
+NoClipButton.Text = "NoClip: OFF"
+NoClipButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+NoClipButton.TextSize = 16
 
 -- Setup SpeedWalk button
-_Dyg16.Name = "_Dyg16"
-_Dyg16.Parent = _fvy5
-_Dyg16.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
-_Dyg16.Position = UDim2.new(0.05, 0, 0.35, 0)
-_Dyg16.Size = UDim2.new(0.9, 0, 0, 30)
-_Dyg16.Font = Enum.Font.SourceSansBold
-_Dyg16.Text = "Speed Walk: OFF"
-_Dyg16.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Dyg16.TextSize = 16
+SpeedWalkButton.Name = "SpeedWalkButton"
+SpeedWalkButton.Parent = MainFrame
+SpeedWalkButton.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
+SpeedWalkButton.Position = UDim2.new(0.05, 0, 0.35, 0)
+SpeedWalkButton.Size = UDim2.new(0.9, 0, 0, 30)
+SpeedWalkButton.Font = Enum.Font.SourceSansBold
+SpeedWalkButton.Text = "Speed Walk: OFF"
+SpeedWalkButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+SpeedWalkButton.TextSize = 16
 
 -- Setup Speed input
-_Nk_18.Name = "_Nk_18"
-_Nk_18.Parent = _fvy5
-_Nk_18.BackgroundTransparency = 1
-_Nk_18.Position = UDim2.new(0.05, 0, 0.5, 0)
-_Nk_18.Size = UDim2.new(0.3, 0, 0, 30)
-_Nk_18.Font = Enum.Font.SourceSansBold
-_Nk_18.Text = "Speed:"
-_Nk_18.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Nk_18.TextSize = 16
-_Nk_18.TextXAlignment = Enum.TextXAlignment.Left
+SpeedLabel.Name = "SpeedLabel"
+SpeedLabel.Parent = MainFrame
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.Position = UDim2.new(0.05, 0, 0.5, 0)
+SpeedLabel.Size = UDim2.new(0.3, 0, 0, 30)
+SpeedLabel.Font = Enum.Font.SourceSansBold
+SpeedLabel.Text = "Speed:"
+SpeedLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+SpeedLabel.TextSize = 16
+SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-_Wsp17.Name = "_Wsp17"
-_Wsp17.Parent = _fvy5
-_Wsp17.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
-_Wsp17.Position = UDim2.new(0.35, 0, 0.5, 0)
-_Wsp17.Size = UDim2.new(0.6, 0, 0, 30)
-_Wsp17.Font = Enum.Font.SourceSansBold
-_Wsp17.Text = "0.01"
-_Wsp17.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Wsp17.TextSize = 16
+SpeedInput.Name = "SpeedInput"
+SpeedInput.Parent = MainFrame
+SpeedInput.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
+SpeedInput.Position = UDim2.new(0.35, 0, 0.5, 0)
+SpeedInput.Size = UDim2.new(0.6, 0, 0, 30)
+SpeedInput.Font = Enum.Font.SourceSansBold
+SpeedInput.Text = "0.01"
+SpeedInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+SpeedInput.TextSize = 16
 
 -- Setup close and minimize buttons
-_KDS19.Name = "CloseButton"
-_KDS19.Parent = _fvy5
-_KDS19.BackgroundColor3 = Color3.fromRGB(225, 25, 0)
-_KDS19.Position = UDim2.new(0, 0, -0.15, 0)
-_KDS19.Size = UDim2.new(0, 45, 0, 28)
-_KDS19.Font = Enum.Font.SourceSansBold
-_KDS19.Text = "X"
-_KDS19.TextColor3 = Color3.fromRGB(255, 255, 255)
-_KDS19.TextSize = 20
+closebutton.Name = "CloseButton"
+closebutton.Parent = MainFrame
+closebutton.BackgroundColor3 = Color3.fromRGB(225, 25, 0)
+closebutton.Position = UDim2.new(0, 0, -0.15, 0)
+closebutton.Size = UDim2.new(0, 45, 0, 28)
+closebutton.Font = Enum.Font.SourceSansBold
+closebutton.Text = "X"
+closebutton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closebutton.TextSize = 20
 
-_CWS20.Name = "MinimizeButton"
-_CWS20.Parent = _fvy5
-_CWS20.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
-_CWS20.Position = UDim2.new(0.2, 0, -0.15, 0)
-_CWS20.Size = UDim2.new(0, 45, 0, 28)
-_CWS20.Font = Enum.Font.SourceSansBold
-_CWS20.Text = "-"
-_CWS20.TextColor3 = Color3.fromRGB(255, 255, 255)
-_CWS20.TextSize = 20
+mini.Name = "MinimizeButton"
+mini.Parent = MainFrame
+mini.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
+mini.Position = UDim2.new(0.2, 0, -0.15, 0)
+mini.Size = UDim2.new(0, 45, 0, 28)
+mini.Font = Enum.Font.SourceSansBold
+mini.Text = "-"
+mini.TextColor3 = Color3.fromRGB(255, 255, 255)
+mini.TextSize = 20
 
-_O8T21.Name = "RestoreButton"
-_O8T21.Parent = _fvy5
-_O8T21.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
-_O8T21.Position = UDim2.new(0.2, 0, -0.15, 0)
-_O8T21.Size = UDim2.new(0, 45, 0, 28)
-_O8T21.Font = Enum.Font.SourceSansBold
-_O8T21.Text = "+"
-_O8T21.TextColor3 = Color3.fromRGB(255, 255, 255)
-_O8T21.TextSize = 20
-_O8T21.Visible = false
+mini2.Name = "RestoreButton"
+mini2.Parent = MainFrame
+mini2.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
+mini2.Position = UDim2.new(0.2, 0, -0.15, 0)
+mini2.Size = UDim2.new(0, 45, 0, 28)
+mini2.Font = Enum.Font.SourceSansBold
+mini2.Text = "+"
+mini2.TextColor3 = Color3.fromRGB(255, 255, 255)
+mini2.TextSize = 20
+mini2.Visible = false
 
 -- Setup Fly button
-_Rcf10.Name = "FlyButton"
-_Rcf10.Parent = _fvy5
-_Rcf10.BackgroundColor3 = Color3.fromRGB(255, 249, 74)
-_Rcf10.Position = UDim2.new(0.05, 0, 0.65, 0)
-_Rcf10.Size = UDim2.new(0.9, 0, 0, 30)
-_Rcf10.Font = Enum.Font.SourceSansBold
-_Rcf10.Text = "Fly: OFF"
-_Rcf10.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Rcf10.TextSize = 16
+onof.Name = "FlyButton"
+onof.Parent = MainFrame
+onof.BackgroundColor3 = Color3.fromRGB(255, 249, 74)
+onof.Position = UDim2.new(0.05, 0, 0.65, 0)
+onof.Size = UDim2.new(0.9, 0, 0, 30)
+onof.Font = Enum.Font.SourceSansBold
+onof.Text = "Fly: OFF"
+onof.TextColor3 = Color3.fromRGB(0, 0, 0)
+onof.TextSize = 16
 
 -- Setup Fly Frame (initially hidden)
-_wZe7 = Instance.new("Frame")
-_wZe7.Name = "_wZe7"
-_wZe7.Parent = _VNf4
-_wZe7.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
-_wZe7.BorderColor3 = Color3.fromRGB(103, 221, 213)
-_wZe7.Position = UDim2.new(0.05, 0, 0.6, 0)
-_wZe7.Size = UDim2.new(0, 190, 0, 57)
-_wZe7.Visible = false
-_wZe7.Active = true
-_wZe7.Draggable = true
+FlyFrame = Instance.new("Frame")
+FlyFrame.Name = "FlyFrame"
+FlyFrame.Parent = main
+FlyFrame.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
+FlyFrame.BorderColor3 = Color3.fromRGB(103, 221, 213)
+FlyFrame.Position = UDim2.new(0.05, 0, 0.6, 0)
+FlyFrame.Size = UDim2.new(0, 190, 0, 57)
+FlyFrame.Visible = false
+FlyFrame.Active = true
+FlyFrame.Draggable = true
 
 -- Setup UP button
-_Cqa8.Name = "_Cqa8"
-_Cqa8.Parent = _wZe7
-_Cqa8.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
-_Cqa8.Size = UDim2.new(0, 44, 0, 28)
-_Cqa8.Font = Enum.Font.SourceSans
-_Cqa8.Text = "UP"
-_Cqa8.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Cqa8.TextSize = 14.000
+up.Name = "up"
+up.Parent = FlyFrame
+up.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
+up.Size = UDim2.new(0, 44, 0, 28)
+up.Font = Enum.Font.SourceSans
+up.Text = "UP"
+up.TextColor3 = Color3.fromRGB(0, 0, 0)
+up.TextSize = 14.000
 
 -- Setup DOWN button
-_mqt9.Name = "_mqt9"
-_mqt9.Parent = _wZe7
-_mqt9.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
-_mqt9.Position = UDim2.new(0, 0, 0.491228074, 0)
-_mqt9.Size = UDim2.new(0, 44, 0, 28)
-_mqt9.Font = Enum.Font.SourceSans
-_mqt9.Text = "DOWN"
-_mqt9.TextColor3 = Color3.fromRGB(0, 0, 0)
-_mqt9.TextSize = 14.000
+down.Name = "down"
+down.Parent = FlyFrame
+down.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
+down.Position = UDim2.new(0, 0, 0.491228074, 0)
+down.Size = UDim2.new(0, 44, 0, 28)
+down.Font = Enum.Font.SourceSans
+down.Text = "DOWN"
+down.TextColor3 = Color3.fromRGB(0, 0, 0)
+down.TextSize = 14.000
 
 -- Setup FLY label
-_Epo11 = Instance.new("TextLabel")
-_Epo11.Parent = _wZe7
-_Epo11.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
-_Epo11.Position = UDim2.new(0.469327301, 0, 0, 0)
-_Epo11.Size = UDim2.new(0, 100, 0, 28)
-_Epo11.Font = Enum.Font.SourceSans
-_Epo11.Text = "FLY CONTROLS"
-_Epo11.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Epo11.TextScaled = true
-_Epo11.TextSize = 14.000
-_Epo11.TextWrapped = true
+FlyLabel = Instance.new("TextLabel")
+FlyLabel.Parent = FlyFrame
+FlyLabel.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
+FlyLabel.Position = UDim2.new(0.469327301, 0, 0, 0)
+FlyLabel.Size = UDim2.new(0, 100, 0, 28)
+FlyLabel.Font = Enum.Font.SourceSans
+FlyLabel.Text = "FLY CONTROLS"
+FlyLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+FlyLabel.TextScaled = true
+FlyLabel.TextSize = 14.000
+FlyLabel.TextWrapped = true
 
 -- Setup PLUS button
-_sd412.Name = "_sd412"
-_sd412.Parent = _wZe7
-_sd412.BackgroundColor3 = Color3.fromRGB(133, 145, 255)
-_sd412.Position = UDim2.new(0.231578946, 0, 0, 0)
-_sd412.Size = UDim2.new(0, 45, 0, 28)
-_sd412.Font = Enum.Font.SourceSans
-_sd412.Text = "+"
-_sd412.TextColor3 = Color3.fromRGB(0, 0, 0)
-_sd412.TextScaled = true
-_sd412.TextSize = 14.000
-_sd412.TextWrapped = true
+plus.Name = "plus"
+plus.Parent = FlyFrame
+plus.BackgroundColor3 = Color3.fromRGB(133, 145, 255)
+plus.Position = UDim2.new(0.231578946, 0, 0, 0)
+plus.Size = UDim2.new(0, 45, 0, 28)
+plus.Font = Enum.Font.SourceSans
+plus.Text = "+"
+plus.TextColor3 = Color3.fromRGB(0, 0, 0)
+plus.TextScaled = true
+plus.TextSize = 14.000
+plus.TextWrapped = true
 
 -- Setup SPEED display
-_oJw13.Name = "_oJw13"
-_oJw13.Parent = _wZe7
-_oJw13.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
-_oJw13.Position = UDim2.new(0.468421042, 0, 0.491228074, 0)
-_oJw13.Size = UDim2.new(0, 44, 0, 28)
-_oJw13.Font = Enum.Font.SourceSans
-_oJw13.Text = "1"
-_oJw13.TextColor3 = Color3.fromRGB(0, 0, 0)
-_oJw13.TextScaled = true
-_oJw13.TextSize = 14.000
-_oJw13.TextWrapped = true
+speed.Name = "speed"
+speed.Parent = FlyFrame
+speed.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
+speed.Position = UDim2.new(0.468421042, 0, 0.491228074, 0)
+speed.Size = UDim2.new(0, 44, 0, 28)
+speed.Font = Enum.Font.SourceSans
+speed.Text = "1"
+speed.TextColor3 = Color3.fromRGB(0, 0, 0)
+speed.TextScaled = true
+speed.TextSize = 14.000
+speed.TextWrapped = true
 
 -- Setup MINUS button
-_pVV14.Name = "_pVV14"
-_pVV14.Parent = _wZe7
-_pVV14.BackgroundColor3 = Color3.fromRGB(123, 255, 247)
-_pVV14.Position = UDim2.new(0.231578946, 0, 0.491228074, 0)
-_pVV14.Size = UDim2.new(0, 45, 0, 29)
-_pVV14.Font = Enum.Font.SourceSans
-_pVV14.Text = "-"
-_pVV14.TextColor3 = Color3.fromRGB(0, 0, 0)
-_pVV14.TextScaled = true
-_pVV14.TextSize = 14.000
-_pVV14.TextWrapped = true
+mine.Name = "mine"
+mine.Parent = FlyFrame
+mine.BackgroundColor3 = Color3.fromRGB(123, 255, 247)
+mine.Position = UDim2.new(0.231578946, 0, 0.491228074, 0)
+mine.Size = UDim2.new(0, 45, 0, 29)
+mine.Font = Enum.Font.SourceSans
+mine.Text = "-"
+mine.TextColor3 = Color3.fromRGB(0, 0, 0)
+mine.TextScaled = true
+mine.TextSize = 14.000
+mine.TextWrapped = true
 
 -- Variables
-local _8_h22 = _WI30.LocalPlayer
-local _1zJ23 = _8_h22.Character or _8_h22.CharacterAdded:Wait()
-local _42Z24 = _1zJ23:WaitForChild("Humanoid")
-local _MFL25 = _1zJ23:WaitForChild("HumanoidRootPart")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
 
-local _USk26 = false
-local _4tH27 = false
-local _R_S28 = false
-local _H6g29 = 1
-local _qjh30 = false
-local _wX731 = false
+local noClipEnabled = false
+local speedWalkEnabled = false
+local flyEnabled = false
+local speeds = 1
+local tpwalking = false
+local nowe = false
 
--- Function to update _1zJ23 references
+-- Function to update character references
 local function updateCharacterReferences()
-    _1zJ23 = _8_h22.Character
-    if _1zJ23 then
-        _42Z24 = _1zJ23:WaitForChild("Humanoid")
-        _MFL25 = _1zJ23:WaitForChild("HumanoidRootPart")
+    character = player.Character
+    if character then
+        humanoid = character:WaitForChild("Humanoid")
+        hrp = character:WaitForChild("HumanoidRootPart")
     end
 end
 
 -- Notification
 game:GetService("StarterGui"):SetCore("SendNotification", { 
-    _FP66 = "Executor Loaded";
+    Title = "Executor Loaded";
     Text = "Fly, NoClip, and Speed Walk";
     Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
 Duration = 5;
 
 -- NOCLIP IMPLEMENTATION
 local function toggleNoClip()
-    _USk26 = not _USk26
-    _Njo15.Text = "NoClip: " .. (_USk26 and "ON" or "OFF")
-    _Njo15.BackgroundColor3 = _USk26 and Color3.fromRGB(180, 180, 0) or Color3.fromRGB(215, 255, 121)
+    noClipEnabled = not noClipEnabled
+    NoClipButton.Text = "NoClip: " .. (noClipEnabled and "ON" or "OFF")
+    NoClipButton.BackgroundColor3 = noClipEnabled and Color3.fromRGB(180, 180, 0) or Color3.fromRGB(215, 255, 121)
 end
 
 local function setNoCollision()
-    if _1zJ23 and _USk26 then
-        for _, part in ipairs(_1zJ23:GetDescendants()) do
+    if character and noClipEnabled then
+        for _, part in ipairs(character:GetDescendants()) do
             if part:IsA("BasePart") and part.CanCollide == true then
                 part.CanCollide = false
             end
@@ -279,15 +274,15 @@ end
 
 -- SPEED WALK IMPLEMENTATION
 local function toggleSpeedWalk()
-    _4tH27 = not _4tH27
-    _Dyg16.Text = "Speed Walk: " .. (_4tH27 and "ON" or "OFF")
-    _Dyg16.BackgroundColor3 = _4tH27 and Color3.fromRGB(0, 180, 0) or Color3.fromRGB(79, 255, 152)
+    speedWalkEnabled = not speedWalkEnabled
+    SpeedWalkButton.Text = "Speed Walk: " .. (speedWalkEnabled and "ON" or "OFF")
+    SpeedWalkButton.BackgroundColor3 = speedWalkEnabled and Color3.fromRGB(0, 180, 0) or Color3.fromRGB(79, 255, 152)
     
-    if _4tH27 then
-        _qjh30 = true
+    if speedWalkEnabled then
+        tpwalking = true
         
         -- Allowed states for movement
-        local _Ns432 = {
+        local allowedStates = {
             [Enum.HumanoidStateType.Running] = true,
             [Enum.HumanoidStateType.RunningNoPhysics] = true,
             [Enum.HumanoidStateType.Freefall] = true,
@@ -299,15 +294,15 @@ local function toggleSpeedWalk()
         
         -- Function to check if movement is allowed
         local function canTranslate()
-            local _pAy33 = _42Z24:GetState()
-            return _Ns432[_pAy33] or false
+            local state = humanoid:GetState()
+            return allowedStates[state] or false
         end
         
         -- Function to check for collisions
         local function isPathClear(direction)
-            local _w1U34 = Ray.new(_MFL25.Position, direction.Unit * 3)
-            local _ZXE35 = _lDM3:FindPartOnRayWithIgnoreList(_w1U34, {_1zJ23})
-            return _ZXE35 == nil
+            local ray = Ray.new(hrp.Position, direction.Unit * 3)
+            local hit = Workspace:FindPartOnRayWithIgnoreList(ray, {character})
+            return hit == nil
         end
         
         -- Function to check if input is a number
@@ -316,296 +311,296 @@ local function toggleSpeedWalk()
         end
         
         spawn(function()
-            local _dIt36 = _UyY1.Heartbeat
+            local hb = RunService.Heartbeat
             
-            while _qjh30 and _dIt36:Wait() and _1zJ23 and _42Z24 and _42Z24.Parent do
-                local _eHO37 = _42Z24.MoveDirection
-                if _eHO37.Magnitude > 0 and canTranslate() then
-                    local _fqL38 = tonumber(_Wsp17.Text) or 0.01
-                    local _Xqf39 = _eHO37.Unit * _fqL38
-                    if isNumber(_fqL38) and isPathClear(_Xqf39) then
-                        _1zJ23:TranslateBy(_Xqf39)
+            while tpwalking and hb:Wait() and character and humanoid and humanoid.Parent do
+                local moveDir = humanoid.MoveDirection
+                if moveDir.Magnitude > 0 and canTranslate() then
+                    local walkSpeed = tonumber(SpeedInput.Text) or 0.01
+                    local step = moveDir.Unit * walkSpeed
+                    if isNumber(walkSpeed) and isPathClear(step) then
+                        character:TranslateBy(step)
                     end
                 end
             end
         end)
     else
-        _qjh30 = false
+        tpwalking = false
     end
 end
 
 -- FLY IMPLEMENTATION
--- Add keyboard controls for _ulZ48
-local _xNd40 = {f = 0, b = 0, l = 0, r = 0}
-local _TWD41 = {f = 0, b = 0, l = 0, r = 0}
+-- Add keyboard controls for flying
+local ctrl = {f = 0, b = 0, l = 0, r = 0}
+local lastctrl = {f = 0, b = 0, l = 0, r = 0}
 
 -- Handle keyboard input
-_jHv2.InputBegan:Connect(function(input)
+UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.W then
-        _xNd40.f = 1
+        ctrl.f = 1
     elseif input.KeyCode == Enum.KeyCode.S then
-        _xNd40.b = 1
+        ctrl.b = 1
     elseif input.KeyCode == Enum.KeyCode.A then
-        _xNd40.l = 1
+        ctrl.l = 1
     elseif input.KeyCode == Enum.KeyCode.D then
-        _xNd40.r = 1
+        ctrl.r = 1
     end
 end)
 
-_jHv2.InputEnded:Connect(function(input)
+UserInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.W then
-        _xNd40.f = 0
+        ctrl.f = 0
     elseif input.KeyCode == Enum.KeyCode.S then
-        _xNd40.b = 0
+        ctrl.b = 0
     elseif input.KeyCode == Enum.KeyCode.A then
-        _xNd40.l = 0
+        ctrl.l = 0
     elseif input.KeyCode == Enum.KeyCode.D then
-        _xNd40.r = 0
+        ctrl.r = 0
     end
 end)
 
 local function toggleFly()
-    _R_S28 = not _R_S28
-    _Rcf10.Text = "Fly: " .. (_R_S28 and "ON" or "OFF")
-    _Rcf10.BackgroundColor3 = _R_S28 and Color3.fromRGB(255, 125, 0) or Color3.fromRGB(255, 249, 74)
-    _wZe7.Visible = _R_S28
+    flyEnabled = not flyEnabled
+    onof.Text = "Fly: " .. (flyEnabled and "ON" or "OFF")
+    onof.BackgroundColor3 = flyEnabled and Color3.fromRGB(255, 125, 0) or Color3.fromRGB(255, 249, 74)
+    FlyFrame.Visible = flyEnabled
     
-    if _R_S28 then
-        _wX731 = true
+    if flyEnabled then
+        nowe = true
         
-        -- Start _oJw13 walking for each _oJw13 level
-        for i = 1, _H6g29 do
+        -- Start speed walking for each speed level
+        for i = 1, speeds do
             spawn(function()
-                local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                _qjh30 = true
-                local _C2F42 = game._WI30.LocalPlayer.Character
-                local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                    if _lCc43.MoveDirection.Magnitude > 0 then
-                        _C2F42:TranslateBy(_lCc43.MoveDirection)
+                local hb = game:GetService("RunService").Heartbeat    
+                tpwalking = true
+                local chr = game.Players.LocalPlayer.Character
+                local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+                while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+                    if hum.MoveDirection.Magnitude > 0 then
+                        chr:TranslateBy(hum.MoveDirection)
                     end
                 end
             end)
         end
         
         -- Disable animations
-        game._WI30.LocalPlayer.Character.Animate.Disabled = true
-        local _sjT44 = game._WI30.LocalPlayer.Character
-        local _WD145 = _sjT44:FindFirstChildOfClass("Humanoid") or _sjT44:FindFirstChildOfClass("AnimationController")
+        game.Players.LocalPlayer.Character.Animate.Disabled = true
+        local Char = game.Players.LocalPlayer.Character
+        local Hum = Char:FindFirstChildOfClass("Humanoid") or Char:FindFirstChildOfClass("AnimationController")
 
-        for i,v in next, _WD145:GetPlayingAnimationTracks() do
+        for i,v in next, Hum:GetPlayingAnimationTracks() do
             v:AdjustSpeed(0)
         end
         
-        -- Disable all _42Z24 states
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
-        _8_h22.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+        -- Disable all humanoid states
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
         
         -- Handle different rig types
-        if game:GetService("_WI30").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R6 then
-            -- R6 rig _ulZ48
-            local _OI246 = game._WI30.LocalPlayer
-            local _GTQ47 = _OI246.Character.Torso
-            local _ulZ48 = true
-            local _0a349 = true
-            local _Lev50 = 50
-            local _Fjt51 = 0
+        if game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R6 then
+            -- R6 rig flying
+            local plr = game.Players.LocalPlayer
+            local torso = plr.Character.Torso
+            local flying = true
+            local deb = true
+            local maxspeed = 50
+            local flyspeed = 0
 
             -- Create BodyGyro for orientation
-            local _sRN52 = Instance.new("BodyGyro", _GTQ47)
-            _sRN52.P = 9e4
-            _sRN52.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            _sRN52.cframe = _GTQ47.CFrame
+            local bg = Instance.new("BodyGyro", torso)
+            bg.P = 9e4
+            bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.cframe = torso.CFrame
             
             -- Create BodyVelocity for movement
-            local _QIk53 = Instance.new("BodyVelocity", _GTQ47)
-            _QIk53.velocity = Vector3.new(0, 0.1, 0)
-            _QIk53.maxForce = Vector3.new(9e9, 9e9, 9e9)
+            local bv = Instance.new("BodyVelocity", torso)
+            bv.velocity = Vector3.new(0, 0.1, 0)
+            bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
             
-            _OI246.Character.Humanoid.PlatformStand = true
+            plr.Character.Humanoid.PlatformStand = true
             
-            -- Main _ulZ48 loop
+            -- Main flying loop
             spawn(function()
-                while _wX731 == true or game:GetService("_WI30").LocalPlayer.Character.Humanoid.Health == 0 do
-                    game:GetService("_UyY1").RenderStepped:Wait()
+                while nowe == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
+                    game:GetService("RunService").RenderStepped:Wait()
 
-                    -- Adjust _oJw13 based on movement
-                    if _xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0 then
-                        _Fjt51 = _Fjt51 + 0.5 + (_Fjt51/_Lev50)
-                        if _Fjt51 > _Lev50 then
-                            _Fjt51 = _Lev50
+                    -- Adjust speed based on movement
+                    if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+                        flyspeed = flyspeed + 0.5 + (flyspeed/maxspeed)
+                        if flyspeed > maxspeed then
+                            flyspeed = maxspeed
                         end
-                    elseif not (_xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0) and _Fjt51 ~= 0 then
-                        _Fjt51 = _Fjt51 - 1
-                        if _Fjt51 < 0 then
-                            _Fjt51 = 0
+                    elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and flyspeed ~= 0 then
+                        flyspeed = flyspeed - 1
+                        if flyspeed < 0 then
+                            flyspeed = 0
                         end
                     end
                     
                     -- Set velocity based on controls
-                    if (_xNd40.l + _xNd40.r) ~= 0 or (_xNd40.f + _xNd40.b) ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_xNd40.f+_xNd40.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_xNd40.l+_xNd40.r,(_xNd40.f+_xNd40.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                        _TWD41 = {f = _xNd40.f, b = _xNd40.b, l = _xNd40.l, r = _xNd40.r}
-                    elseif (_xNd40.l + _xNd40.r) == 0 and (_xNd40.f + _xNd40.b) == 0 and _Fjt51 ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_TWD41.f+_TWD41.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_TWD41.l+_TWD41.r,(_TWD41.f+_TWD41.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
+                    if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+                        bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * flyspeed * speeds
+                        lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+                    elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and flyspeed ~= 0 then
+                        bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * flyspeed * speeds
                     else
-                        _QIk53.velocity = Vector3.new(0, 0, 0)
+                        bv.velocity = Vector3.new(0, 0, 0)
                     end
                     
                     -- Update orientation
-                    _sRN52.cframe = game._lDM3.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((_xNd40.f+_xNd40.b)*50*_Fjt51/_Lev50), 0, 0)
+                    bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*flyspeed/maxspeed), 0, 0)
                     
-                    -- Check if _ulZ48 is still enabled
-                    if not _wX731 then
-                        _sRN52:Destroy()
-                        _QIk53:Destroy()
-                        _OI246.Character.Humanoid.PlatformStand = false
-                        game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                        _qjh30 = false
+                    -- Check if flying is still enabled
+                    if not nowe then
+                        bg:Destroy()
+                        bv:Destroy()
+                        plr.Character.Humanoid.PlatformStand = false
+                        game.Players.LocalPlayer.Character.Animate.Disabled = false
+                        tpwalking = false
                         break
                     end
                 end
                 
-                -- Clean _Cqa8 if loop exits
-                if _sRN52 and _sRN52.Parent then
-                    _sRN52:Destroy()
+                -- Clean up if loop exits
+                if bg and bg.Parent then
+                    bg:Destroy()
                 end
-                if _QIk53 and _QIk53.Parent then
-                    _QIk53:Destroy()
+                if bv and bv.Parent then
+                    bv:Destroy()
                 end
                 
-                _OI246.Character.Humanoid.PlatformStand = false
-                game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                _qjh30 = false
+                plr.Character.Humanoid.PlatformStand = false
+                game.Players.LocalPlayer.Character.Animate.Disabled = false
+                tpwalking = false
             end)
         else
-            -- R15 rig _ulZ48
-            local _OI246 = game._WI30.LocalPlayer
-            local _LBA54 = _OI246.Character._LBA54
-            local _ulZ48 = true
-            local _0a349 = true
-            local _Lev50 = 50
-            local _Fjt51 = 0
+            -- R15 rig flying
+            local plr = game.Players.LocalPlayer
+            local UpperTorso = plr.Character.UpperTorso
+            local flying = true
+            local deb = true
+            local maxspeed = 50
+            local flyspeed = 0
 
             -- Create BodyGyro for orientation
-            local _sRN52 = Instance.new("BodyGyro", _LBA54)
-            _sRN52.P = 9e4
-            _sRN52.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            _sRN52.cframe = _LBA54.CFrame
+            local bg = Instance.new("BodyGyro", UpperTorso)
+            bg.P = 9e4
+            bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.cframe = UpperTorso.CFrame
             
             -- Create BodyVelocity for movement
-            local _QIk53 = Instance.new("BodyVelocity", _LBA54)
-            _QIk53.velocity = Vector3.new(0, 0.1, 0)
-            _QIk53.maxForce = Vector3.new(9e9, 9e9, 9e9)
+            local bv = Instance.new("BodyVelocity", UpperTorso)
+            bv.velocity = Vector3.new(0, 0.1, 0)
+            bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
             
-            _OI246.Character.Humanoid.PlatformStand = true
+            plr.Character.Humanoid.PlatformStand = true
             
-            -- Main _ulZ48 loop
+            -- Main flying loop
             spawn(function()
-                while _wX731 == true or game:GetService("_WI30").LocalPlayer.Character.Humanoid.Health == 0 do
+                while nowe == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
                     wait()
 
-                    -- Adjust _oJw13 based on movement
-                    if _xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0 then
-                        _Fjt51 = _Fjt51 + 0.5 + (_Fjt51/_Lev50)
-                        if _Fjt51 > _Lev50 then
-                            _Fjt51 = _Lev50
+                    -- Adjust speed based on movement
+                    if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+                        flyspeed = flyspeed + 0.5 + (flyspeed/maxspeed)
+                        if flyspeed > maxspeed then
+                            flyspeed = maxspeed
                         end
-                    elseif not (_xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0) and _Fjt51 ~= 0 then
-                        _Fjt51 = _Fjt51 - 1
-                        if _Fjt51 < 0 then
-                            _Fjt51 = 0
+                    elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and flyspeed ~= 0 then
+                        flyspeed = flyspeed - 1
+                        if flyspeed < 0 then
+                            flyspeed = 0
                         end
                     end
                     
                     -- Set velocity based on controls
-                    if (_xNd40.l + _xNd40.r) ~= 0 or (_xNd40.f + _xNd40.b) ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_xNd40.f+_xNd40.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_xNd40.l+_xNd40.r,(_xNd40.f+_xNd40.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                        _TWD41 = {f = _xNd40.f, b = _xNd40.b, l = _xNd40.l, r = _xNd40.r}
-                    elseif (_xNd40.l + _xNd40.r) == 0 and (_xNd40.f + _xNd40.b) == 0 and _Fjt51 ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_TWD41.f+_TWD41.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_TWD41.l+_TWD41.r,(_TWD41.f+_TWD41.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
+                    if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+                        bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * flyspeed * speeds
+                        lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+                    elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and flyspeed ~= 0 then
+                        bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * flyspeed * speeds
                     else
-                        _QIk53.velocity = Vector3.new(0, 0, 0)
+                        bv.velocity = Vector3.new(0, 0, 0)
                     end
                     
                     -- Update orientation
-                    _sRN52.cframe = game._lDM3.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((_xNd40.f+_xNd40.b)*50*_Fjt51/_Lev50), 0, 0)
+                    bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*flyspeed/maxspeed), 0, 0)
                     
-                    -- Check if _ulZ48 is still enabled
-                    if not _wX731 then
-                        _sRN52:Destroy()
-                        _QIk53:Destroy()
-                        _OI246.Character.Humanoid.PlatformStand = false
-                        game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                        _qjh30 = false
+                    -- Check if flying is still enabled
+                    if not nowe then
+                        bg:Destroy()
+                        bv:Destroy()
+                        plr.Character.Humanoid.PlatformStand = false
+                        game.Players.LocalPlayer.Character.Animate.Disabled = false
+                        tpwalking = false
                         break
                     end
                 end
                 
-                -- Clean _Cqa8 if loop exits
-                if _sRN52 and _sRN52.Parent then
-                    _sRN52:Destroy()
+                -- Clean up if loop exits
+                if bg and bg.Parent then
+                    bg:Destroy()
                 end
-                if _QIk53 and _QIk53.Parent then
-                    _QIk53:Destroy()
+                if bv and bv.Parent then
+                    bv:Destroy()
                 end
                 
-                _OI246.Character.Humanoid.PlatformStand = false
-                game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                _qjh30 = false
+                plr.Character.Humanoid.PlatformStand = false
+                game.Players.LocalPlayer.Character.Animate.Disabled = false
+                tpwalking = false
             end)
         end
     else
-        _wX731 = false
+        nowe = false
         
-        -- Re-enable all _42Z24 states
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, true)
-        _8_h22.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+        -- Re-enable all humanoid states
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, true)
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, true)
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
         
-        _qjh30 = false
+        tpwalking = false
     end
 end
 
 -- UP button functionality
 local tis
-_Cqa8.MouseButton1Down:connect(function()
-    tis = _Cqa8.MouseEnter:connect(function()
+up.MouseButton1Down:connect(function()
+    tis = up.MouseEnter:connect(function()
         while tis do
             wait()
-            game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame = game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 1, 0)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 1, 0)
         end
     end)
 end)
 
-_Cqa8.MouseLeave:connect(function()
+up.MouseLeave:connect(function()
     if tis then
         tis:Disconnect()
         tis = nil
@@ -614,16 +609,16 @@ end)
 
 -- DOWN button functionality
 local dis
-_mqt9.MouseButton1Down:connect(function()
-    dis = _mqt9.MouseEnter:connect(function()
+down.MouseButton1Down:connect(function()
+    dis = down.MouseEnter:connect(function()
         while dis do
             wait()
-            game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame = game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1, 0)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1, 0)
         end
     end)
 end)
 
-_mqt9.MouseLeave:connect(function()
+down.MouseLeave:connect(function()
     if dis then
         dis:Disconnect()
         dis = nil
@@ -631,20 +626,20 @@ _mqt9.MouseLeave:connect(function()
 end)
 
 -- PLUS button functionality
-_sd412.MouseButton1Down:connect(function()
-    _H6g29 = _H6g29 + 1
-    _oJw13.Text = _H6g29
-    if _wX731 == true then
-        _qjh30 = false
-        for i = 1, _H6g29 do
+plus.MouseButton1Down:connect(function()
+    speeds = speeds + 1
+    speed.Text = speeds
+    if nowe == true then
+        tpwalking = false
+        for i = 1, speeds do
             spawn(function()
-                local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                _qjh30 = true
-                local _C2F42 = game._WI30.LocalPlayer.Character
-                local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                    if _lCc43.MoveDirection.Magnitude > 0 then
-                        _C2F42:TranslateBy(_lCc43.MoveDirection)
+                local hb = game:GetService("RunService").Heartbeat    
+                tpwalking = true
+                local chr = game.Players.LocalPlayer.Character
+                local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+                while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+                    if hum.MoveDirection.Magnitude > 0 then
+                        chr:TranslateBy(hum.MoveDirection)
                     end
                 end
             end)
@@ -653,25 +648,25 @@ _sd412.MouseButton1Down:connect(function()
 end)
 
 -- MINUS button functionality
-_pVV14.MouseButton1Down:connect(function()
-    if _H6g29 == 1 then
-        _oJw13.Text = 'cannot be less than 1'
+mine.MouseButton1Down:connect(function()
+    if speeds == 1 then
+        speed.Text = 'cannot be less than 1'
         wait(1)
-        _oJw13.Text = _H6g29
+        speed.Text = speeds
     else
-        _H6g29 = _H6g29 - 1
-        _oJw13.Text = _H6g29
-        if _wX731 == true then
-            _qjh30 = false
-            for i = 1, _H6g29 do
+        speeds = speeds - 1
+        speed.Text = speeds
+        if nowe == true then
+            tpwalking = false
+            for i = 1, speeds do
                 spawn(function()
-                    local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                    _qjh30 = true
-                    local _C2F42 = game._WI30.LocalPlayer.Character
-                    local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                    while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                        if _lCc43.MoveDirection.Magnitude > 0 then
-                            _C2F42:TranslateBy(_lCc43.MoveDirection)
+                    local hb = game:GetService("RunService").Heartbeat    
+                    tpwalking = true
+                    local chr = game.Players.LocalPlayer.Character
+                    local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+                    while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+                        if hum.MoveDirection.Magnitude > 0 then
+                            chr:TranslateBy(hum.MoveDirection)
                         end
                     end
                 end)
@@ -681,1623 +676,82 @@ _pVV14.MouseButton1Down:connect(function()
 end)
 
 -- Connect buttons to functions
-_Njo15.MouseButton1Click:Connect(toggleNoClip)
-_Dyg16.MouseButton1Click:Connect(toggleSpeedWalk)
-_Rcf10.MouseButton1Click:Connect(toggleFly)
+NoClipButton.MouseButton1Click:Connect(toggleNoClip)
+SpeedWalkButton.MouseButton1Click:Connect(toggleSpeedWalk)
+onof.MouseButton1Click:Connect(toggleFly)
 
 -- CLOSE button functionality
-_KDS19.MouseButton1Click:Connect(function()
-    _VNf4:Destroy()
-    -- Clean _Cqa8 any running processes
-    _qjh30 = false
-    _USk26 = false
-    _wX731 = false
+closebutton.MouseButton1Click:Connect(function()
+    main:Destroy()
+    -- Clean up any running processes
+    tpwalking = false
+    noClipEnabled = false
+    nowe = false
 end)
 
 -- MINIMIZE button functionality
-_CWS20.MouseButton1Click:Connect(function()
-    _fvy5.Size = UDim2.new(0, 250, 0, 30)
-    _Njo15.Visible = false
-    _Dyg16.Visible = false
-    _Nk_18.Visible = false
-    _Wsp17.Visible = false
-    _Rcf10.Visible = false
-    _CWS20.Visible = false
-    _O8T21.Visible = true
-    _wZe7.Visible = false
+mini.MouseButton1Click:Connect(function()
+    MainFrame.Size = UDim2.new(0, 250, 0, 30)
+    NoClipButton.Visible = false
+    SpeedWalkButton.Visible = false
+    SpeedLabel.Visible = false
+    SpeedInput.Visible = false
+    onof.Visible = false
+    mini.Visible = false
+    mini2.Visible = true
+    FlyFrame.Visible = false
 end)
 
 -- RESTORE button functionality
-_O8T21.MouseButton1Click:Connect(function()
-    _fvy5.Size = UDim2.new(0, 250, 0, 200)
-    _Njo15.Visible = true
-    _Dyg16.Visible = true
-    _Nk_18.Visible = true
-    _Wsp17.Visible = true
-    _Rcf10.Visible = true
-    _CWS20.Visible = true
-    _O8T21.Visible = false
-    if _R_S28 then
-        _wZe7.Visible = true
+mini2.MouseButton1Click:Connect(function()
+    MainFrame.Size = UDim2.new(0, 250, 0, 200)
+    NoClipButton.Visible = true
+    SpeedWalkButton.Visible = true
+    SpeedLabel.Visible = true
+    SpeedInput.Visible = true
+    onof.Visible = true
+    mini.Visible = true
+    mini2.Visible = false
+    if flyEnabled then
+        FlyFrame.Visible = true
     end
 end)
 
 -- NoClip Loop
-_UyY1.Stepped:Connect(function()
+RunService.Stepped:Connect(function()
     setNoCollision()
 end)
 
 -- Character Added
-_8_h22.CharacterAdded:Connect(function(char)
+player.CharacterAdded:Connect(function(char)
     updateCharacterReferences()
     wait(0.7)
     
-    -- Reset states when _1zJ23 respawns
-    if _4tH27 then
+    -- Reset states when character respawns
+    if speedWalkEnabled then
         toggleSpeedWalk()
     end
     
-    if _USk26 then
+    if noClipEnabled then
         toggleNoClip()
     end
     
-    if _R_S28 then
+    if flyEnabled then
         toggleFly()
     end
     
-    game._WI30.LocalPlayer.Character.Humanoid.PlatformStand = false
-    game._WI30.LocalPlayer.Character.Animate.Disabled = false
+    game.Players.LocalPlayer.Character.Humanoid.PlatformStand = false
+    game.Players.LocalPlayer.Character.Animate.Disabled = false
 end)
 
--- Update _oJw13 values when textbox changes
-_Wsp17.FocusLost:Connect(function()
-    local _T8H55 = tonumber(_Wsp17.Text)
-    if not _T8H55 then
-        _Wsp17.Text = "0.01"
+-- Update speed values when textbox changes
+SpeedInput.FocusLost:Connect(function()
+    local newSpeed = tonumber(SpeedInput.Text)
+    if not newSpeed then
+        SpeedInput.Text = "0.01"
     end
     
-    if _4tH27 then
-        toggleSpeedWalk()
-        wait(0.1)
-        toggleSpeedWalk()
-    end
-end)]=]
-local _checksum = 0
-for i = 1, #_script_content do
-  _checksum = (_checksum + string.byte(_script_content:sub(i, i)) * i) % 2^32
-end
-
-local function _verify_integrity()
-  local _current_content = [=[--[[ Obfuscated with Roblox Script Obfuscator Pro v2.0 | 2025-04-29T15:17:32.820Z ]]
-
--- Roblox Executor Script with Fly, NoClip, and Speed Walking
-local _WI30 = game:GetService("_WI30")
-local _UyY1 = game:GetService("_UyY1")
-local _jHv2 = game:GetService("_jHv2")
-local _lDM3 = game:GetService("_lDM3")
-
--- Create _VNf4 GUI
-local _VNf4 = Instance.new("ScreenGui")
-local _fvy5 = Instance.new("Frame")
-local _FP66 = Instance.new("TextLabel")
-
--- Create fly GUI elements
-local _wZe7 = Instance.new("Frame")
-local _Cqa8 = Instance.new("TextButton")
-local _mqt9 = Instance.new("TextButton")
-local _Rcf10 = Instance.new("TextButton")
-local _Epo11 = Instance.new("TextLabel")
-local _sd412 = Instance.new("TextButton")
-local _oJw13 = Instance.new("TextLabel")
-local _pVV14 = Instance.new("TextButton")
-
--- Create control buttons
-local _Njo15 = Instance.new("TextButton")
-local _Dyg16 = Instance.new("TextButton")
-local _Wsp17 = Instance.new("TextBox")
-local _Nk_18 = Instance.new("TextLabel")
-local _KDS19 = Instance.new("TextButton")
-local _CWS20 = Instance.new("TextButton")
-local _O8T21 = Instance.new("TextButton")
-
--- Setup _VNf4 GUI
-_VNf4.Name = "ExecutorGUI"
-_VNf4.Parent = game._WI30.LocalPlayer:WaitForChild("PlayerGui")
-_VNf4.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-_VNf4.ResetOnSpawn = false
-
--- Setup _VNf4 frame
-_fvy5.Name = "_fvy5"
-_fvy5.Parent = _VNf4
-_fvy5.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
-_fvy5.BorderColor3 = Color3.fromRGB(103, 221, 213)
-_fvy5.Position = UDim2.new(0.05, 0, 0.05, 0)
-_fvy5.Size = UDim2.new(0, 250, 0, 200)
-_fvy5.Active = true
-_fvy5.Draggable = true
-
--- Setup title
-_FP66.Name = "_FP66"
-_FP66.Parent = _fvy5
-_FP66.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
-_FP66.Size = UDim2.new(1, 0, 0, 30)
-_FP66.Font = Enum.Font.SourceSansBold
-_FP66.Text = "Roblox Executor"
-_FP66.TextColor3 = Color3.fromRGB(0, 0, 0)
-_FP66.TextSize = 18
-
--- Setup NoClip button
-_Njo15.Name = "_Njo15"
-_Njo15.Parent = _fvy5
-_Njo15.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
-_Njo15.Position = UDim2.new(0.05, 0, 0.2, 0)
-_Njo15.Size = UDim2.new(0.9, 0, 0, 30)
-_Njo15.Font = Enum.Font.SourceSansBold
-_Njo15.Text = "NoClip: OFF"
-_Njo15.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Njo15.TextSize = 16
-
--- Setup SpeedWalk button
-_Dyg16.Name = "_Dyg16"
-_Dyg16.Parent = _fvy5
-_Dyg16.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
-_Dyg16.Position = UDim2.new(0.05, 0, 0.35, 0)
-_Dyg16.Size = UDim2.new(0.9, 0, 0, 30)
-_Dyg16.Font = Enum.Font.SourceSansBold
-_Dyg16.Text = "Speed Walk: OFF"
-_Dyg16.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Dyg16.TextSize = 16
-
--- Setup Speed input
-_Nk_18.Name = "_Nk_18"
-_Nk_18.Parent = _fvy5
-_Nk_18.BackgroundTransparency = 1
-_Nk_18.Position = UDim2.new(0.05, 0, 0.5, 0)
-_Nk_18.Size = UDim2.new(0.3, 0, 0, 30)
-_Nk_18.Font = Enum.Font.SourceSansBold
-_Nk_18.Text = "Speed:"
-_Nk_18.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Nk_18.TextSize = 16
-_Nk_18.TextXAlignment = Enum.TextXAlignment.Left
-
-_Wsp17.Name = "_Wsp17"
-_Wsp17.Parent = _fvy5
-_Wsp17.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
-_Wsp17.Position = UDim2.new(0.35, 0, 0.5, 0)
-_Wsp17.Size = UDim2.new(0.6, 0, 0, 30)
-_Wsp17.Font = Enum.Font.SourceSansBold
-_Wsp17.Text = "0.01"
-_Wsp17.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Wsp17.TextSize = 16
-
--- Setup close and minimize buttons
-_KDS19.Name = "CloseButton"
-_KDS19.Parent = _fvy5
-_KDS19.BackgroundColor3 = Color3.fromRGB(225, 25, 0)
-_KDS19.Position = UDim2.new(0, 0, -0.15, 0)
-_KDS19.Size = UDim2.new(0, 45, 0, 28)
-_KDS19.Font = Enum.Font.SourceSansBold
-_KDS19.Text = "X"
-_KDS19.TextColor3 = Color3.fromRGB(255, 255, 255)
-_KDS19.TextSize = 20
-
-_CWS20.Name = "MinimizeButton"
-_CWS20.Parent = _fvy5
-_CWS20.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
-_CWS20.Position = UDim2.new(0.2, 0, -0.15, 0)
-_CWS20.Size = UDim2.new(0, 45, 0, 28)
-_CWS20.Font = Enum.Font.SourceSansBold
-_CWS20.Text = "-"
-_CWS20.TextColor3 = Color3.fromRGB(255, 255, 255)
-_CWS20.TextSize = 20
-
-_O8T21.Name = "RestoreButton"
-_O8T21.Parent = _fvy5
-_O8T21.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
-_O8T21.Position = UDim2.new(0.2, 0, -0.15, 0)
-_O8T21.Size = UDim2.new(0, 45, 0, 28)
-_O8T21.Font = Enum.Font.SourceSansBold
-_O8T21.Text = "+"
-_O8T21.TextColor3 = Color3.fromRGB(255, 255, 255)
-_O8T21.TextSize = 20
-_O8T21.Visible = false
-
--- Setup Fly button
-_Rcf10.Name = "FlyButton"
-_Rcf10.Parent = _fvy5
-_Rcf10.BackgroundColor3 = Color3.fromRGB(255, 249, 74)
-_Rcf10.Position = UDim2.new(0.05, 0, 0.65, 0)
-_Rcf10.Size = UDim2.new(0.9, 0, 0, 30)
-_Rcf10.Font = Enum.Font.SourceSansBold
-_Rcf10.Text = "Fly: OFF"
-_Rcf10.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Rcf10.TextSize = 16
-
--- Setup Fly Frame (initially hidden)
-_wZe7 = Instance.new("Frame")
-_wZe7.Name = "_wZe7"
-_wZe7.Parent = _VNf4
-_wZe7.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
-_wZe7.BorderColor3 = Color3.fromRGB(103, 221, 213)
-_wZe7.Position = UDim2.new(0.05, 0, 0.6, 0)
-_wZe7.Size = UDim2.new(0, 190, 0, 57)
-_wZe7.Visible = false
-_wZe7.Active = true
-_wZe7.Draggable = true
-
--- Setup UP button
-_Cqa8.Name = "_Cqa8"
-_Cqa8.Parent = _wZe7
-_Cqa8.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
-_Cqa8.Size = UDim2.new(0, 44, 0, 28)
-_Cqa8.Font = Enum.Font.SourceSans
-_Cqa8.Text = "UP"
-_Cqa8.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Cqa8.TextSize = 14.000
-
--- Setup DOWN button
-_mqt9.Name = "_mqt9"
-_mqt9.Parent = _wZe7
-_mqt9.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
-_mqt9.Position = UDim2.new(0, 0, 0.491228074, 0)
-_mqt9.Size = UDim2.new(0, 44, 0, 28)
-_mqt9.Font = Enum.Font.SourceSans
-_mqt9.Text = "DOWN"
-_mqt9.TextColor3 = Color3.fromRGB(0, 0, 0)
-_mqt9.TextSize = 14.000
-
--- Setup FLY label
-_Epo11 = Instance.new("TextLabel")
-_Epo11.Parent = _wZe7
-_Epo11.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
-_Epo11.Position = UDim2.new(0.469327301, 0, 0, 0)
-_Epo11.Size = UDim2.new(0, 100, 0, 28)
-_Epo11.Font = Enum.Font.SourceSans
-_Epo11.Text = "FLY CONTROLS"
-_Epo11.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Epo11.TextScaled = true
-_Epo11.TextSize = 14.000
-_Epo11.TextWrapped = true
-
--- Setup PLUS button
-_sd412.Name = "_sd412"
-_sd412.Parent = _wZe7
-_sd412.BackgroundColor3 = Color3.fromRGB(133, 145, 255)
-_sd412.Position = UDim2.new(0.231578946, 0, 0, 0)
-_sd412.Size = UDim2.new(0, 45, 0, 28)
-_sd412.Font = Enum.Font.SourceSans
-_sd412.Text = "+"
-_sd412.TextColor3 = Color3.fromRGB(0, 0, 0)
-_sd412.TextScaled = true
-_sd412.TextSize = 14.000
-_sd412.TextWrapped = true
-
--- Setup SPEED display
-_oJw13.Name = "_oJw13"
-_oJw13.Parent = _wZe7
-_oJw13.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
-_oJw13.Position = UDim2.new(0.468421042, 0, 0.491228074, 0)
-_oJw13.Size = UDim2.new(0, 44, 0, 28)
-_oJw13.Font = Enum.Font.SourceSans
-_oJw13.Text = "1"
-_oJw13.TextColor3 = Color3.fromRGB(0, 0, 0)
-_oJw13.TextScaled = true
-_oJw13.TextSize = 14.000
-_oJw13.TextWrapped = true
-
--- Setup MINUS button
-_pVV14.Name = "_pVV14"
-_pVV14.Parent = _wZe7
-_pVV14.BackgroundColor3 = Color3.fromRGB(123, 255, 247)
-_pVV14.Position = UDim2.new(0.231578946, 0, 0.491228074, 0)
-_pVV14.Size = UDim2.new(0, 45, 0, 29)
-_pVV14.Font = Enum.Font.SourceSans
-_pVV14.Text = "-"
-_pVV14.TextColor3 = Color3.fromRGB(0, 0, 0)
-_pVV14.TextScaled = true
-_pVV14.TextSize = 14.000
-_pVV14.TextWrapped = true
-
--- Variables
-local _8_h22 = _WI30.LocalPlayer
-local _1zJ23 = _8_h22.Character or _8_h22.CharacterAdded:Wait()
-local _42Z24 = _1zJ23:WaitForChild("Humanoid")
-local _MFL25 = _1zJ23:WaitForChild("HumanoidRootPart")
-
-local _USk26 = false
-local _4tH27 = false
-local _R_S28 = false
-local _H6g29 = 1
-local _qjh30 = false
-local _wX731 = false
-
--- Function to update _1zJ23 references
-local function updateCharacterReferences()
-    _1zJ23 = _8_h22.Character
-    if _1zJ23 then
-        _42Z24 = _1zJ23:WaitForChild("Humanoid")
-        _MFL25 = _1zJ23:WaitForChild("HumanoidRootPart")
-    end
-end
-
--- Notification
-game:GetService("StarterGui"):SetCore("SendNotification", { 
-    _FP66 = "Executor Loaded";
-    Text = "Fly, NoClip, and Speed Walk";
-    Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
-Duration = 5;
-
--- NOCLIP IMPLEMENTATION
-local function toggleNoClip()
-    _USk26 = not _USk26
-    _Njo15.Text = "NoClip: " .. (_USk26 and "ON" or "OFF")
-    _Njo15.BackgroundColor3 = _USk26 and Color3.fromRGB(180, 180, 0) or Color3.fromRGB(215, 255, 121)
-end
-
-local function setNoCollision()
-    if _1zJ23 and _USk26 then
-        for _, part in ipairs(_1zJ23:GetDescendants()) do
-            if part:IsA("BasePart") and part.CanCollide == true then
-                part.CanCollide = false
-            end
-        end
-    end
-end
-
--- SPEED WALK IMPLEMENTATION
-local function toggleSpeedWalk()
-    _4tH27 = not _4tH27
-    _Dyg16.Text = "Speed Walk: " .. (_4tH27 and "ON" or "OFF")
-    _Dyg16.BackgroundColor3 = _4tH27 and Color3.fromRGB(0, 180, 0) or Color3.fromRGB(79, 255, 152)
-    
-    if _4tH27 then
-        _qjh30 = true
-        
-        -- Allowed states for movement
-        local _Ns432 = {
-            [Enum.HumanoidStateType.Running] = true,
-            [Enum.HumanoidStateType.RunningNoPhysics] = true,
-            [Enum.HumanoidStateType.Freefall] = true,
-            [Enum.HumanoidStateType.Jumping] = true,
-            [Enum.HumanoidStateType.Swimming] = true,
-            [Enum.HumanoidStateType.Seated] = true,
-            [Enum.HumanoidStateType.Landed] = true
-        }
-        
-        -- Function to check if movement is allowed
-        local function canTranslate()
-            local _pAy33 = _42Z24:GetState()
-            return _Ns432[_pAy33] or false
-        end
-        
-        -- Function to check for collisions
-        local function isPathClear(direction)
-            local _w1U34 = Ray.new(_MFL25.Position, direction.Unit * 3)
-            local _ZXE35 = _lDM3:FindPartOnRayWithIgnoreList(_w1U34, {_1zJ23})
-            return _ZXE35 == nil
-        end
-        
-        -- Function to check if input is a number
-        local function isNumber(str)
-            return tonumber(str) ~= nil or str == 'inf'
-        end
-        
-        spawn(function()
-            local _dIt36 = _UyY1.Heartbeat
-            
-            while _qjh30 and _dIt36:Wait() and _1zJ23 and _42Z24 and _42Z24.Parent do
-                local _eHO37 = _42Z24.MoveDirection
-                if _eHO37.Magnitude > 0 and canTranslate() then
-                    local _fqL38 = tonumber(_Wsp17.Text) or 0.01
-                    local _Xqf39 = _eHO37.Unit * _fqL38
-                    if isNumber(_fqL38) and isPathClear(_Xqf39) then
-                        _1zJ23:TranslateBy(_Xqf39)
-                    end
-                end
-            end
-        end)
-    else
-        _qjh30 = false
-    end
-end
-
--- FLY IMPLEMENTATION
--- Add keyboard controls for _ulZ48
-local _xNd40 = {f = 0, b = 0, l = 0, r = 0}
-local _TWD41 = {f = 0, b = 0, l = 0, r = 0}
-
--- Handle keyboard input
-_jHv2.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W then
-        _xNd40.f = 1
-    elseif input.KeyCode == Enum.KeyCode.S then
-        _xNd40.b = 1
-    elseif input.KeyCode == Enum.KeyCode.A then
-        _xNd40.l = 1
-    elseif input.KeyCode == Enum.KeyCode.D then
-        _xNd40.r = 1
-    end
-end)
-
-_jHv2.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W then
-        _xNd40.f = 0
-    elseif input.KeyCode == Enum.KeyCode.S then
-        _xNd40.b = 0
-    elseif input.KeyCode == Enum.KeyCode.A then
-        _xNd40.l = 0
-    elseif input.KeyCode == Enum.KeyCode.D then
-        _xNd40.r = 0
-    end
-end)
-
-local function toggleFly()
-    _R_S28 = not _R_S28
-    _Rcf10.Text = "Fly: " .. (_R_S28 and "ON" or "OFF")
-    _Rcf10.BackgroundColor3 = _R_S28 and Color3.fromRGB(255, 125, 0) or Color3.fromRGB(255, 249, 74)
-    _wZe7.Visible = _R_S28
-    
-    if _R_S28 then
-        _wX731 = true
-        
-        -- Start _oJw13 walking for each _oJw13 level
-        for i = 1, _H6g29 do
-            spawn(function()
-                local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                _qjh30 = true
-                local _C2F42 = game._WI30.LocalPlayer.Character
-                local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                    if _lCc43.MoveDirection.Magnitude > 0 then
-                        _C2F42:TranslateBy(_lCc43.MoveDirection)
-                    end
-                end
-            end)
-        end
-        
-        -- Disable animations
-        game._WI30.LocalPlayer.Character.Animate.Disabled = true
-        local _sjT44 = game._WI30.LocalPlayer.Character
-        local _WD145 = _sjT44:FindFirstChildOfClass("Humanoid") or _sjT44:FindFirstChildOfClass("AnimationController")
-
-        for i,v in next, _WD145:GetPlayingAnimationTracks() do
-            v:AdjustSpeed(0)
-        end
-        
-        -- Disable all _42Z24 states
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
-        _8_h22.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-        
-        -- Handle different rig types
-        if game:GetService("_WI30").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R6 then
-            -- R6 rig _ulZ48
-            local _OI246 = game._WI30.LocalPlayer
-            local _GTQ47 = _OI246.Character.Torso
-            local _ulZ48 = true
-            local _0a349 = true
-            local _Lev50 = 50
-            local _Fjt51 = 0
-
-            -- Create BodyGyro for orientation
-            local _sRN52 = Instance.new("BodyGyro", _GTQ47)
-            _sRN52.P = 9e4
-            _sRN52.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            _sRN52.cframe = _GTQ47.CFrame
-            
-            -- Create BodyVelocity for movement
-            local _QIk53 = Instance.new("BodyVelocity", _GTQ47)
-            _QIk53.velocity = Vector3.new(0, 0.1, 0)
-            _QIk53.maxForce = Vector3.new(9e9, 9e9, 9e9)
-            
-            _OI246.Character.Humanoid.PlatformStand = true
-            
-            -- Main _ulZ48 loop
-            spawn(function()
-                while _wX731 == true or game:GetService("_WI30").LocalPlayer.Character.Humanoid.Health == 0 do
-                    game:GetService("_UyY1").RenderStepped:Wait()
-
-                    -- Adjust _oJw13 based on movement
-                    if _xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0 then
-                        _Fjt51 = _Fjt51 + 0.5 + (_Fjt51/_Lev50)
-                        if _Fjt51 > _Lev50 then
-                            _Fjt51 = _Lev50
-                        end
-                    elseif not (_xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0) and _Fjt51 ~= 0 then
-                        _Fjt51 = _Fjt51 - 1
-                        if _Fjt51 < 0 then
-                            _Fjt51 = 0
-                        end
-                    end
-                    
-                    -- Set velocity based on controls
-                    if (_xNd40.l + _xNd40.r) ~= 0 or (_xNd40.f + _xNd40.b) ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_xNd40.f+_xNd40.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_xNd40.l+_xNd40.r,(_xNd40.f+_xNd40.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                        _TWD41 = {f = _xNd40.f, b = _xNd40.b, l = _xNd40.l, r = _xNd40.r}
-                    elseif (_xNd40.l + _xNd40.r) == 0 and (_xNd40.f + _xNd40.b) == 0 and _Fjt51 ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_TWD41.f+_TWD41.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_TWD41.l+_TWD41.r,(_TWD41.f+_TWD41.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                    else
-                        _QIk53.velocity = Vector3.new(0, 0, 0)
-                    end
-                    
-                    -- Update orientation
-                    _sRN52.cframe = game._lDM3.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((_xNd40.f+_xNd40.b)*50*_Fjt51/_Lev50), 0, 0)
-                    
-                    -- Check if _ulZ48 is still enabled
-                    if not _wX731 then
-                        _sRN52:Destroy()
-                        _QIk53:Destroy()
-                        _OI246.Character.Humanoid.PlatformStand = false
-                        game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                        _qjh30 = false
-                        break
-                    end
-                end
-                
-                -- Clean _Cqa8 if loop exits
-                if _sRN52 and _sRN52.Parent then
-                    _sRN52:Destroy()
-                end
-                if _QIk53 and _QIk53.Parent then
-                    _QIk53:Destroy()
-                end
-                
-                _OI246.Character.Humanoid.PlatformStand = false
-                game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                _qjh30 = false
-            end)
-        else
-            -- R15 rig _ulZ48
-            local _OI246 = game._WI30.LocalPlayer
-            local _LBA54 = _OI246.Character._LBA54
-            local _ulZ48 = true
-            local _0a349 = true
-            local _Lev50 = 50
-            local _Fjt51 = 0
-
-            -- Create BodyGyro for orientation
-            local _sRN52 = Instance.new("BodyGyro", _LBA54)
-            _sRN52.P = 9e4
-            _sRN52.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            _sRN52.cframe = _LBA54.CFrame
-            
-            -- Create BodyVelocity for movement
-            local _QIk53 = Instance.new("BodyVelocity", _LBA54)
-            _QIk53.velocity = Vector3.new(0, 0.1, 0)
-            _QIk53.maxForce = Vector3.new(9e9, 9e9, 9e9)
-            
-            _OI246.Character.Humanoid.PlatformStand = true
-            
-            -- Main _ulZ48 loop
-            spawn(function()
-                while _wX731 == true or game:GetService("_WI30").LocalPlayer.Character.Humanoid.Health == 0 do
-                    wait()
-
-                    -- Adjust _oJw13 based on movement
-                    if _xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0 then
-                        _Fjt51 = _Fjt51 + 0.5 + (_Fjt51/_Lev50)
-                        if _Fjt51 > _Lev50 then
-                            _Fjt51 = _Lev50
-                        end
-                    elseif not (_xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0) and _Fjt51 ~= 0 then
-                        _Fjt51 = _Fjt51 - 1
-                        if _Fjt51 < 0 then
-                            _Fjt51 = 0
-                        end
-                    end
-                    
-                    -- Set velocity based on controls
-                    if (_xNd40.l + _xNd40.r) ~= 0 or (_xNd40.f + _xNd40.b) ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_xNd40.f+_xNd40.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_xNd40.l+_xNd40.r,(_xNd40.f+_xNd40.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                        _TWD41 = {f = _xNd40.f, b = _xNd40.b, l = _xNd40.l, r = _xNd40.r}
-                    elseif (_xNd40.l + _xNd40.r) == 0 and (_xNd40.f + _xNd40.b) == 0 and _Fjt51 ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_TWD41.f+_TWD41.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_TWD41.l+_TWD41.r,(_TWD41.f+_TWD41.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                    else
-                        _QIk53.velocity = Vector3.new(0, 0, 0)
-                    end
-                    
-                    -- Update orientation
-                    _sRN52.cframe = game._lDM3.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((_xNd40.f+_xNd40.b)*50*_Fjt51/_Lev50), 0, 0)
-                    
-                    -- Check if _ulZ48 is still enabled
-                    if not _wX731 then
-                        _sRN52:Destroy()
-                        _QIk53:Destroy()
-                        _OI246.Character.Humanoid.PlatformStand = false
-                        game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                        _qjh30 = false
-                        break
-                    end
-                end
-                
-                -- Clean _Cqa8 if loop exits
-                if _sRN52 and _sRN52.Parent then
-                    _sRN52:Destroy()
-                end
-                if _QIk53 and _QIk53.Parent then
-                    _QIk53:Destroy()
-                end
-                
-                _OI246.Character.Humanoid.PlatformStand = false
-                game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                _qjh30 = false
-            end)
-        end
-    else
-        _wX731 = false
-        
-        -- Re-enable all _42Z24 states
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, true)
-        _8_h22.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
-        
-        _qjh30 = false
-    end
-end
-
--- UP button functionality
-local tis
-_Cqa8.MouseButton1Down:connect(function()
-    tis = _Cqa8.MouseEnter:connect(function()
-        while tis do
-            wait()
-            game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame = game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 1, 0)
-        end
-    end)
-end)
-
-_Cqa8.MouseLeave:connect(function()
-    if tis then
-        tis:Disconnect()
-        tis = nil
-    end
-end)
-
--- DOWN button functionality
-local dis
-_mqt9.MouseButton1Down:connect(function()
-    dis = _mqt9.MouseEnter:connect(function()
-        while dis do
-            wait()
-            game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame = game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1, 0)
-        end
-    end)
-end)
-
-_mqt9.MouseLeave:connect(function()
-    if dis then
-        dis:Disconnect()
-        dis = nil
-    end
-end)
-
--- PLUS button functionality
-_sd412.MouseButton1Down:connect(function()
-    _H6g29 = _H6g29 + 1
-    _oJw13.Text = _H6g29
-    if _wX731 == true then
-        _qjh30 = false
-        for i = 1, _H6g29 do
-            spawn(function()
-                local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                _qjh30 = true
-                local _C2F42 = game._WI30.LocalPlayer.Character
-                local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                    if _lCc43.MoveDirection.Magnitude > 0 then
-                        _C2F42:TranslateBy(_lCc43.MoveDirection)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- MINUS button functionality
-_pVV14.MouseButton1Down:connect(function()
-    if _H6g29 == 1 then
-        _oJw13.Text = 'cannot be less than 1'
-        wait(1)
-        _oJw13.Text = _H6g29
-    else
-        _H6g29 = _H6g29 - 1
-        _oJw13.Text = _H6g29
-        if _wX731 == true then
-            _qjh30 = false
-            for i = 1, _H6g29 do
-                spawn(function()
-                    local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                    _qjh30 = true
-                    local _C2F42 = game._WI30.LocalPlayer.Character
-                    local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                    while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                        if _lCc43.MoveDirection.Magnitude > 0 then
-                            _C2F42:TranslateBy(_lCc43.MoveDirection)
-                        end
-                    end
-                end)
-            end
-        end
-    end
-end)
-
--- Connect buttons to functions
-_Njo15.MouseButton1Click:Connect(toggleNoClip)
-_Dyg16.MouseButton1Click:Connect(toggleSpeedWalk)
-_Rcf10.MouseButton1Click:Connect(toggleFly)
-
--- CLOSE button functionality
-_KDS19.MouseButton1Click:Connect(function()
-    _VNf4:Destroy()
-    -- Clean _Cqa8 any running processes
-    _qjh30 = false
-    _USk26 = false
-    _wX731 = false
-end)
-
--- MINIMIZE button functionality
-_CWS20.MouseButton1Click:Connect(function()
-    _fvy5.Size = UDim2.new(0, 250, 0, 30)
-    _Njo15.Visible = false
-    _Dyg16.Visible = false
-    _Nk_18.Visible = false
-    _Wsp17.Visible = false
-    _Rcf10.Visible = false
-    _CWS20.Visible = false
-    _O8T21.Visible = true
-    _wZe7.Visible = false
-end)
-
--- RESTORE button functionality
-_O8T21.MouseButton1Click:Connect(function()
-    _fvy5.Size = UDim2.new(0, 250, 0, 200)
-    _Njo15.Visible = true
-    _Dyg16.Visible = true
-    _Nk_18.Visible = true
-    _Wsp17.Visible = true
-    _Rcf10.Visible = true
-    _CWS20.Visible = true
-    _O8T21.Visible = false
-    if _R_S28 then
-        _wZe7.Visible = true
-    end
-end)
-
--- NoClip Loop
-_UyY1.Stepped:Connect(function()
-    setNoCollision()
-end)
-
--- Character Added
-_8_h22.CharacterAdded:Connect(function(char)
-    updateCharacterReferences()
-    wait(0.7)
-    
-    -- Reset states when _1zJ23 respawns
-    if _4tH27 then
-        toggleSpeedWalk()
-    end
-    
-    if _USk26 then
-        toggleNoClip()
-    end
-    
-    if _R_S28 then
-        toggleFly()
-    end
-    
-    game._WI30.LocalPlayer.Character.Humanoid.PlatformStand = false
-    game._WI30.LocalPlayer.Character.Animate.Disabled = false
-end)
-
--- Update _oJw13 values when textbox changes
-_Wsp17.FocusLost:Connect(function()
-    local _T8H55 = tonumber(_Wsp17.Text)
-    if not _T8H55 then
-        _Wsp17.Text = "0.01"
-    end
-    
-    if _4tH27 then
-        toggleSpeedWalk()
-        wait(0.1)
-        toggleSpeedWalk()
-    end
-end)]=]
-  local _current_checksum = 0
-  for i = 1, #_current_content do
-      _current_checksum = (_current_checksum + string.byte(_current_content:sub(i, i)) * i) % 2^32
-  end
-  return _checksum == _current_checksum
-end
-
-if not _verify_integrity() then
-  warn("Script integrity check failed. The script may have been tampered with.")
-  return
-end
-
--- Actual script starts here
---[[ Obfuscated with Roblox Script Obfuscator Pro v2.0 | 2025-04-29T15:17:32.820Z ]]
-
--- Roblox Executor Script with Fly, NoClip, and Speed Walking
-local _WI30 = game:GetService("_WI30")
-local _UyY1 = game:GetService("_UyY1")
-local _jHv2 = game:GetService("_jHv2")
-local _lDM3 = game:GetService("_lDM3")
-
--- Create _VNf4 GUI
-local _VNf4 = Instance.new("ScreenGui")
-local _fvy5 = Instance.new("Frame")
-local _FP66 = Instance.new("TextLabel")
-
--- Create fly GUI elements
-local _wZe7 = Instance.new("Frame")
-local _Cqa8 = Instance.new("TextButton")
-local _mqt9 = Instance.new("TextButton")
-local _Rcf10 = Instance.new("TextButton")
-local _Epo11 = Instance.new("TextLabel")
-local _sd412 = Instance.new("TextButton")
-local _oJw13 = Instance.new("TextLabel")
-local _pVV14 = Instance.new("TextButton")
-
--- Create control buttons
-local _Njo15 = Instance.new("TextButton")
-local _Dyg16 = Instance.new("TextButton")
-local _Wsp17 = Instance.new("TextBox")
-local _Nk_18 = Instance.new("TextLabel")
-local _KDS19 = Instance.new("TextButton")
-local _CWS20 = Instance.new("TextButton")
-local _O8T21 = Instance.new("TextButton")
-
--- Setup _VNf4 GUI
-_VNf4.Name = "ExecutorGUI"
-_VNf4.Parent = game._WI30.LocalPlayer:WaitForChild("PlayerGui")
-_VNf4.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-_VNf4.ResetOnSpawn = false
-
--- Setup _VNf4 frame
-_fvy5.Name = "_fvy5"
-_fvy5.Parent = _VNf4
-_fvy5.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
-_fvy5.BorderColor3 = Color3.fromRGB(103, 221, 213)
-_fvy5.Position = UDim2.new(0.05, 0, 0.05, 0)
-_fvy5.Size = UDim2.new(0, 250, 0, 200)
-_fvy5.Active = true
-_fvy5.Draggable = true
-
--- Setup title
-_FP66.Name = "_FP66"
-_FP66.Parent = _fvy5
-_FP66.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
-_FP66.Size = UDim2.new(1, 0, 0, 30)
-_FP66.Font = Enum.Font.SourceSansBold
-_FP66.Text = "Roblox Executor"
-_FP66.TextColor3 = Color3.fromRGB(0, 0, 0)
-_FP66.TextSize = 18
-
--- Setup NoClip button
-_Njo15.Name = "_Njo15"
-_Njo15.Parent = _fvy5
-_Njo15.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
-_Njo15.Position = UDim2.new(0.05, 0, 0.2, 0)
-_Njo15.Size = UDim2.new(0.9, 0, 0, 30)
-_Njo15.Font = Enum.Font.SourceSansBold
-_Njo15.Text = "NoClip: OFF"
-_Njo15.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Njo15.TextSize = 16
-
--- Setup SpeedWalk button
-_Dyg16.Name = "_Dyg16"
-_Dyg16.Parent = _fvy5
-_Dyg16.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
-_Dyg16.Position = UDim2.new(0.05, 0, 0.35, 0)
-_Dyg16.Size = UDim2.new(0.9, 0, 0, 30)
-_Dyg16.Font = Enum.Font.SourceSansBold
-_Dyg16.Text = "Speed Walk: OFF"
-_Dyg16.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Dyg16.TextSize = 16
-
--- Setup Speed input
-_Nk_18.Name = "_Nk_18"
-_Nk_18.Parent = _fvy5
-_Nk_18.BackgroundTransparency = 1
-_Nk_18.Position = UDim2.new(0.05, 0, 0.5, 0)
-_Nk_18.Size = UDim2.new(0.3, 0, 0, 30)
-_Nk_18.Font = Enum.Font.SourceSansBold
-_Nk_18.Text = "Speed:"
-_Nk_18.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Nk_18.TextSize = 16
-_Nk_18.TextXAlignment = Enum.TextXAlignment.Left
-
-_Wsp17.Name = "_Wsp17"
-_Wsp17.Parent = _fvy5
-_Wsp17.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
-_Wsp17.Position = UDim2.new(0.35, 0, 0.5, 0)
-_Wsp17.Size = UDim2.new(0.6, 0, 0, 30)
-_Wsp17.Font = Enum.Font.SourceSansBold
-_Wsp17.Text = "0.01"
-_Wsp17.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Wsp17.TextSize = 16
-
--- Setup close and minimize buttons
-_KDS19.Name = "CloseButton"
-_KDS19.Parent = _fvy5
-_KDS19.BackgroundColor3 = Color3.fromRGB(225, 25, 0)
-_KDS19.Position = UDim2.new(0, 0, -0.15, 0)
-_KDS19.Size = UDim2.new(0, 45, 0, 28)
-_KDS19.Font = Enum.Font.SourceSansBold
-_KDS19.Text = "X"
-_KDS19.TextColor3 = Color3.fromRGB(255, 255, 255)
-_KDS19.TextSize = 20
-
-_CWS20.Name = "MinimizeButton"
-_CWS20.Parent = _fvy5
-_CWS20.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
-_CWS20.Position = UDim2.new(0.2, 0, -0.15, 0)
-_CWS20.Size = UDim2.new(0, 45, 0, 28)
-_CWS20.Font = Enum.Font.SourceSansBold
-_CWS20.Text = "-"
-_CWS20.TextColor3 = Color3.fromRGB(255, 255, 255)
-_CWS20.TextSize = 20
-
-_O8T21.Name = "RestoreButton"
-_O8T21.Parent = _fvy5
-_O8T21.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
-_O8T21.Position = UDim2.new(0.2, 0, -0.15, 0)
-_O8T21.Size = UDim2.new(0, 45, 0, 28)
-_O8T21.Font = Enum.Font.SourceSansBold
-_O8T21.Text = "+"
-_O8T21.TextColor3 = Color3.fromRGB(255, 255, 255)
-_O8T21.TextSize = 20
-_O8T21.Visible = false
-
--- Setup Fly button
-_Rcf10.Name = "FlyButton"
-_Rcf10.Parent = _fvy5
-_Rcf10.BackgroundColor3 = Color3.fromRGB(255, 249, 74)
-_Rcf10.Position = UDim2.new(0.05, 0, 0.65, 0)
-_Rcf10.Size = UDim2.new(0.9, 0, 0, 30)
-_Rcf10.Font = Enum.Font.SourceSansBold
-_Rcf10.Text = "Fly: OFF"
-_Rcf10.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Rcf10.TextSize = 16
-
--- Setup Fly Frame (initially hidden)
-_wZe7 = Instance.new("Frame")
-_wZe7.Name = "_wZe7"
-_wZe7.Parent = _VNf4
-_wZe7.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
-_wZe7.BorderColor3 = Color3.fromRGB(103, 221, 213)
-_wZe7.Position = UDim2.new(0.05, 0, 0.6, 0)
-_wZe7.Size = UDim2.new(0, 190, 0, 57)
-_wZe7.Visible = false
-_wZe7.Active = true
-_wZe7.Draggable = true
-
--- Setup UP button
-_Cqa8.Name = "_Cqa8"
-_Cqa8.Parent = _wZe7
-_Cqa8.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
-_Cqa8.Size = UDim2.new(0, 44, 0, 28)
-_Cqa8.Font = Enum.Font.SourceSans
-_Cqa8.Text = "UP"
-_Cqa8.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Cqa8.TextSize = 14.000
-
--- Setup DOWN button
-_mqt9.Name = "_mqt9"
-_mqt9.Parent = _wZe7
-_mqt9.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
-_mqt9.Position = UDim2.new(0, 0, 0.491228074, 0)
-_mqt9.Size = UDim2.new(0, 44, 0, 28)
-_mqt9.Font = Enum.Font.SourceSans
-_mqt9.Text = "DOWN"
-_mqt9.TextColor3 = Color3.fromRGB(0, 0, 0)
-_mqt9.TextSize = 14.000
-
--- Setup FLY label
-_Epo11 = Instance.new("TextLabel")
-_Epo11.Parent = _wZe7
-_Epo11.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
-_Epo11.Position = UDim2.new(0.469327301, 0, 0, 0)
-_Epo11.Size = UDim2.new(0, 100, 0, 28)
-_Epo11.Font = Enum.Font.SourceSans
-_Epo11.Text = "FLY CONTROLS"
-_Epo11.TextColor3 = Color3.fromRGB(0, 0, 0)
-_Epo11.TextScaled = true
-_Epo11.TextSize = 14.000
-_Epo11.TextWrapped = true
-
--- Setup PLUS button
-_sd412.Name = "_sd412"
-_sd412.Parent = _wZe7
-_sd412.BackgroundColor3 = Color3.fromRGB(133, 145, 255)
-_sd412.Position = UDim2.new(0.231578946, 0, 0, 0)
-_sd412.Size = UDim2.new(0, 45, 0, 28)
-_sd412.Font = Enum.Font.SourceSans
-_sd412.Text = "+"
-_sd412.TextColor3 = Color3.fromRGB(0, 0, 0)
-_sd412.TextScaled = true
-_sd412.TextSize = 14.000
-_sd412.TextWrapped = true
-
--- Setup SPEED display
-_oJw13.Name = "_oJw13"
-_oJw13.Parent = _wZe7
-_oJw13.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
-_oJw13.Position = UDim2.new(0.468421042, 0, 0.491228074, 0)
-_oJw13.Size = UDim2.new(0, 44, 0, 28)
-_oJw13.Font = Enum.Font.SourceSans
-_oJw13.Text = "1"
-_oJw13.TextColor3 = Color3.fromRGB(0, 0, 0)
-_oJw13.TextScaled = true
-_oJw13.TextSize = 14.000
-_oJw13.TextWrapped = true
-
--- Setup MINUS button
-_pVV14.Name = "_pVV14"
-_pVV14.Parent = _wZe7
-_pVV14.BackgroundColor3 = Color3.fromRGB(123, 255, 247)
-_pVV14.Position = UDim2.new(0.231578946, 0, 0.491228074, 0)
-_pVV14.Size = UDim2.new(0, 45, 0, 29)
-_pVV14.Font = Enum.Font.SourceSans
-_pVV14.Text = "-"
-_pVV14.TextColor3 = Color3.fromRGB(0, 0, 0)
-_pVV14.TextScaled = true
-_pVV14.TextSize = 14.000
-_pVV14.TextWrapped = true
-
--- Variables
-local _8_h22 = _WI30.LocalPlayer
-local _1zJ23 = _8_h22.Character or _8_h22.CharacterAdded:Wait()
-local _42Z24 = _1zJ23:WaitForChild("Humanoid")
-local _MFL25 = _1zJ23:WaitForChild("HumanoidRootPart")
-
-local _USk26 = false
-local _4tH27 = false
-local _R_S28 = false
-local _H6g29 = 1
-local _qjh30 = false
-local _wX731 = false
-
--- Function to update _1zJ23 references
-local function updateCharacterReferences()
-    _1zJ23 = _8_h22.Character
-    if _1zJ23 then
-        _42Z24 = _1zJ23:WaitForChild("Humanoid")
-        _MFL25 = _1zJ23:WaitForChild("HumanoidRootPart")
-    end
-end
-
--- Notification
-game:GetService("StarterGui"):SetCore("SendNotification", { 
-    _FP66 = "Executor Loaded";
-    Text = "Fly, NoClip, and Speed Walk";
-    Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
-Duration = 5;
-
--- NOCLIP IMPLEMENTATION
-local function toggleNoClip()
-    _USk26 = not _USk26
-    _Njo15.Text = "NoClip: " .. (_USk26 and "ON" or "OFF")
-    _Njo15.BackgroundColor3 = _USk26 and Color3.fromRGB(180, 180, 0) or Color3.fromRGB(215, 255, 121)
-end
-
-local function setNoCollision()
-    if _1zJ23 and _USk26 then
-        for _, part in ipairs(_1zJ23:GetDescendants()) do
-            if part:IsA("BasePart") and part.CanCollide == true then
-                part.CanCollide = false
-            end
-        end
-    end
-end
-
--- SPEED WALK IMPLEMENTATION
-local function toggleSpeedWalk()
-    _4tH27 = not _4tH27
-    _Dyg16.Text = "Speed Walk: " .. (_4tH27 and "ON" or "OFF")
-    _Dyg16.BackgroundColor3 = _4tH27 and Color3.fromRGB(0, 180, 0) or Color3.fromRGB(79, 255, 152)
-    
-    if _4tH27 then
-        _qjh30 = true
-        
-        -- Allowed states for movement
-        local _Ns432 = {
-            [Enum.HumanoidStateType.Running] = true,
-            [Enum.HumanoidStateType.RunningNoPhysics] = true,
-            [Enum.HumanoidStateType.Freefall] = true,
-            [Enum.HumanoidStateType.Jumping] = true,
-            [Enum.HumanoidStateType.Swimming] = true,
-            [Enum.HumanoidStateType.Seated] = true,
-            [Enum.HumanoidStateType.Landed] = true
-        }
-        
-        -- Function to check if movement is allowed
-        local function canTranslate()
-            local _pAy33 = _42Z24:GetState()
-            return _Ns432[_pAy33] or false
-        end
-        
-        -- Function to check for collisions
-        local function isPathClear(direction)
-            local _w1U34 = Ray.new(_MFL25.Position, direction.Unit * 3)
-            local _ZXE35 = _lDM3:FindPartOnRayWithIgnoreList(_w1U34, {_1zJ23})
-            return _ZXE35 == nil
-        end
-        
-        -- Function to check if input is a number
-        local function isNumber(str)
-            return tonumber(str) ~= nil or str == 'inf'
-        end
-        
-        spawn(function()
-            local _dIt36 = _UyY1.Heartbeat
-            
-            while _qjh30 and _dIt36:Wait() and _1zJ23 and _42Z24 and _42Z24.Parent do
-                local _eHO37 = _42Z24.MoveDirection
-                if _eHO37.Magnitude > 0 and canTranslate() then
-                    local _fqL38 = tonumber(_Wsp17.Text) or 0.01
-                    local _Xqf39 = _eHO37.Unit * _fqL38
-                    if isNumber(_fqL38) and isPathClear(_Xqf39) then
-                        _1zJ23:TranslateBy(_Xqf39)
-                    end
-                end
-            end
-        end)
-    else
-        _qjh30 = false
-    end
-end
-
--- FLY IMPLEMENTATION
--- Add keyboard controls for _ulZ48
-local _xNd40 = {f = 0, b = 0, l = 0, r = 0}
-local _TWD41 = {f = 0, b = 0, l = 0, r = 0}
-
--- Handle keyboard input
-_jHv2.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W then
-        _xNd40.f = 1
-    elseif input.KeyCode == Enum.KeyCode.S then
-        _xNd40.b = 1
-    elseif input.KeyCode == Enum.KeyCode.A then
-        _xNd40.l = 1
-    elseif input.KeyCode == Enum.KeyCode.D then
-        _xNd40.r = 1
-    end
-end)
-
-_jHv2.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W then
-        _xNd40.f = 0
-    elseif input.KeyCode == Enum.KeyCode.S then
-        _xNd40.b = 0
-    elseif input.KeyCode == Enum.KeyCode.A then
-        _xNd40.l = 0
-    elseif input.KeyCode == Enum.KeyCode.D then
-        _xNd40.r = 0
-    end
-end)
-
-local function toggleFly()
-    _R_S28 = not _R_S28
-    _Rcf10.Text = "Fly: " .. (_R_S28 and "ON" or "OFF")
-    _Rcf10.BackgroundColor3 = _R_S28 and Color3.fromRGB(255, 125, 0) or Color3.fromRGB(255, 249, 74)
-    _wZe7.Visible = _R_S28
-    
-    if _R_S28 then
-        _wX731 = true
-        
-        -- Start _oJw13 walking for each _oJw13 level
-        for i = 1, _H6g29 do
-            spawn(function()
-                local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                _qjh30 = true
-                local _C2F42 = game._WI30.LocalPlayer.Character
-                local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                    if _lCc43.MoveDirection.Magnitude > 0 then
-                        _C2F42:TranslateBy(_lCc43.MoveDirection)
-                    end
-                end
-            end)
-        end
-        
-        -- Disable animations
-        game._WI30.LocalPlayer.Character.Animate.Disabled = true
-        local _sjT44 = game._WI30.LocalPlayer.Character
-        local _WD145 = _sjT44:FindFirstChildOfClass("Humanoid") or _sjT44:FindFirstChildOfClass("AnimationController")
-
-        for i,v in next, _WD145:GetPlayingAnimationTracks() do
-            v:AdjustSpeed(0)
-        end
-        
-        -- Disable all _42Z24 states
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
-        _8_h22.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-        
-        -- Handle different rig types
-        if game:GetService("_WI30").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R6 then
-            -- R6 rig _ulZ48
-            local _OI246 = game._WI30.LocalPlayer
-            local _GTQ47 = _OI246.Character.Torso
-            local _ulZ48 = true
-            local _0a349 = true
-            local _Lev50 = 50
-            local _Fjt51 = 0
-
-            -- Create BodyGyro for orientation
-            local _sRN52 = Instance.new("BodyGyro", _GTQ47)
-            _sRN52.P = 9e4
-            _sRN52.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            _sRN52.cframe = _GTQ47.CFrame
-            
-            -- Create BodyVelocity for movement
-            local _QIk53 = Instance.new("BodyVelocity", _GTQ47)
-            _QIk53.velocity = Vector3.new(0, 0.1, 0)
-            _QIk53.maxForce = Vector3.new(9e9, 9e9, 9e9)
-            
-            _OI246.Character.Humanoid.PlatformStand = true
-            
-            -- Main _ulZ48 loop
-            spawn(function()
-                while _wX731 == true or game:GetService("_WI30").LocalPlayer.Character.Humanoid.Health == 0 do
-                    game:GetService("_UyY1").RenderStepped:Wait()
-
-                    -- Adjust _oJw13 based on movement
-                    if _xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0 then
-                        _Fjt51 = _Fjt51 + 0.5 + (_Fjt51/_Lev50)
-                        if _Fjt51 > _Lev50 then
-                            _Fjt51 = _Lev50
-                        end
-                    elseif not (_xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0) and _Fjt51 ~= 0 then
-                        _Fjt51 = _Fjt51 - 1
-                        if _Fjt51 < 0 then
-                            _Fjt51 = 0
-                        end
-                    end
-                    
-                    -- Set velocity based on controls
-                    if (_xNd40.l + _xNd40.r) ~= 0 or (_xNd40.f + _xNd40.b) ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_xNd40.f+_xNd40.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_xNd40.l+_xNd40.r,(_xNd40.f+_xNd40.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                        _TWD41 = {f = _xNd40.f, b = _xNd40.b, l = _xNd40.l, r = _xNd40.r}
-                    elseif (_xNd40.l + _xNd40.r) == 0 and (_xNd40.f + _xNd40.b) == 0 and _Fjt51 ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_TWD41.f+_TWD41.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_TWD41.l+_TWD41.r,(_TWD41.f+_TWD41.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                    else
-                        _QIk53.velocity = Vector3.new(0, 0, 0)
-                    end
-                    
-                    -- Update orientation
-                    _sRN52.cframe = game._lDM3.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((_xNd40.f+_xNd40.b)*50*_Fjt51/_Lev50), 0, 0)
-                    
-                    -- Check if _ulZ48 is still enabled
-                    if not _wX731 then
-                        _sRN52:Destroy()
-                        _QIk53:Destroy()
-                        _OI246.Character.Humanoid.PlatformStand = false
-                        game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                        _qjh30 = false
-                        break
-                    end
-                end
-                
-                -- Clean _Cqa8 if loop exits
-                if _sRN52 and _sRN52.Parent then
-                    _sRN52:Destroy()
-                end
-                if _QIk53 and _QIk53.Parent then
-                    _QIk53:Destroy()
-                end
-                
-                _OI246.Character.Humanoid.PlatformStand = false
-                game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                _qjh30 = false
-            end)
-        else
-            -- R15 rig _ulZ48
-            local _OI246 = game._WI30.LocalPlayer
-            local _LBA54 = _OI246.Character._LBA54
-            local _ulZ48 = true
-            local _0a349 = true
-            local _Lev50 = 50
-            local _Fjt51 = 0
-
-            -- Create BodyGyro for orientation
-            local _sRN52 = Instance.new("BodyGyro", _LBA54)
-            _sRN52.P = 9e4
-            _sRN52.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            _sRN52.cframe = _LBA54.CFrame
-            
-            -- Create BodyVelocity for movement
-            local _QIk53 = Instance.new("BodyVelocity", _LBA54)
-            _QIk53.velocity = Vector3.new(0, 0.1, 0)
-            _QIk53.maxForce = Vector3.new(9e9, 9e9, 9e9)
-            
-            _OI246.Character.Humanoid.PlatformStand = true
-            
-            -- Main _ulZ48 loop
-            spawn(function()
-                while _wX731 == true or game:GetService("_WI30").LocalPlayer.Character.Humanoid.Health == 0 do
-                    wait()
-
-                    -- Adjust _oJw13 based on movement
-                    if _xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0 then
-                        _Fjt51 = _Fjt51 + 0.5 + (_Fjt51/_Lev50)
-                        if _Fjt51 > _Lev50 then
-                            _Fjt51 = _Lev50
-                        end
-                    elseif not (_xNd40.l + _xNd40.r ~= 0 or _xNd40.f + _xNd40.b ~= 0) and _Fjt51 ~= 0 then
-                        _Fjt51 = _Fjt51 - 1
-                        if _Fjt51 < 0 then
-                            _Fjt51 = 0
-                        end
-                    end
-                    
-                    -- Set velocity based on controls
-                    if (_xNd40.l + _xNd40.r) ~= 0 or (_xNd40.f + _xNd40.b) ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_xNd40.f+_xNd40.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_xNd40.l+_xNd40.r,(_xNd40.f+_xNd40.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                        _TWD41 = {f = _xNd40.f, b = _xNd40.b, l = _xNd40.l, r = _xNd40.r}
-                    elseif (_xNd40.l + _xNd40.r) == 0 and (_xNd40.f + _xNd40.b) == 0 and _Fjt51 ~= 0 then
-                        _QIk53.velocity = ((game._lDM3.CurrentCamera.CoordinateFrame.lookVector * (_TWD41.f+_TWD41.b)) + ((game._lDM3.CurrentCamera.CoordinateFrame * CFrame.new(_TWD41.l+_TWD41.r,(_TWD41.f+_TWD41.b)*.2,0).p) - game._lDM3.CurrentCamera.CoordinateFrame.p)) * _Fjt51 * _H6g29
-                    else
-                        _QIk53.velocity = Vector3.new(0, 0, 0)
-                    end
-                    
-                    -- Update orientation
-                    _sRN52.cframe = game._lDM3.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((_xNd40.f+_xNd40.b)*50*_Fjt51/_Lev50), 0, 0)
-                    
-                    -- Check if _ulZ48 is still enabled
-                    if not _wX731 then
-                        _sRN52:Destroy()
-                        _QIk53:Destroy()
-                        _OI246.Character.Humanoid.PlatformStand = false
-                        game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                        _qjh30 = false
-                        break
-                    end
-                end
-                
-                -- Clean _Cqa8 if loop exits
-                if _sRN52 and _sRN52.Parent then
-                    _sRN52:Destroy()
-                end
-                if _QIk53 and _QIk53.Parent then
-                    _QIk53:Destroy()
-                end
-                
-                _OI246.Character.Humanoid.PlatformStand = false
-                game._WI30.LocalPlayer.Character.Animate.Disabled = false
-                _qjh30 = false
-            end)
-        end
-    else
-        _wX731 = false
-        
-        -- Re-enable all _42Z24 states
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, true)
-        _8_h22.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, true)
-        _8_h22.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
-        
-        _qjh30 = false
-    end
-end
-
--- UP button functionality
-local tis
-_Cqa8.MouseButton1Down:connect(function()
-    tis = _Cqa8.MouseEnter:connect(function()
-        while tis do
-            wait()
-            game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame = game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 1, 0)
-        end
-    end)
-end)
-
-_Cqa8.MouseLeave:connect(function()
-    if tis then
-        tis:Disconnect()
-        tis = nil
-    end
-end)
-
--- DOWN button functionality
-local dis
-_mqt9.MouseButton1Down:connect(function()
-    dis = _mqt9.MouseEnter:connect(function()
-        while dis do
-            wait()
-            game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame = game._WI30.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1, 0)
-        end
-    end)
-end)
-
-_mqt9.MouseLeave:connect(function()
-    if dis then
-        dis:Disconnect()
-        dis = nil
-    end
-end)
-
--- PLUS button functionality
-_sd412.MouseButton1Down:connect(function()
-    _H6g29 = _H6g29 + 1
-    _oJw13.Text = _H6g29
-    if _wX731 == true then
-        _qjh30 = false
-        for i = 1, _H6g29 do
-            spawn(function()
-                local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                _qjh30 = true
-                local _C2F42 = game._WI30.LocalPlayer.Character
-                local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                    if _lCc43.MoveDirection.Magnitude > 0 then
-                        _C2F42:TranslateBy(_lCc43.MoveDirection)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- MINUS button functionality
-_pVV14.MouseButton1Down:connect(function()
-    if _H6g29 == 1 then
-        _oJw13.Text = 'cannot be less than 1'
-        wait(1)
-        _oJw13.Text = _H6g29
-    else
-        _H6g29 = _H6g29 - 1
-        _oJw13.Text = _H6g29
-        if _wX731 == true then
-            _qjh30 = false
-            for i = 1, _H6g29 do
-                spawn(function()
-                    local _dIt36 = game:GetService("_UyY1").Heartbeat    
-                    _qjh30 = true
-                    local _C2F42 = game._WI30.LocalPlayer.Character
-                    local _lCc43 = _C2F42 and _C2F42:FindFirstChildWhichIsA("Humanoid")
-                    while _qjh30 and _dIt36:Wait() and _C2F42 and _lCc43 and _lCc43.Parent do
-                        if _lCc43.MoveDirection.Magnitude > 0 then
-                            _C2F42:TranslateBy(_lCc43.MoveDirection)
-                        end
-                    end
-                end)
-            end
-        end
-    end
-end)
-
--- Connect buttons to functions
-_Njo15.MouseButton1Click:Connect(toggleNoClip)
-_Dyg16.MouseButton1Click:Connect(toggleSpeedWalk)
-_Rcf10.MouseButton1Click:Connect(toggleFly)
-
--- CLOSE button functionality
-_KDS19.MouseButton1Click:Connect(function()
-    _VNf4:Destroy()
-    -- Clean _Cqa8 any running processes
-    _qjh30 = false
-    _USk26 = false
-    _wX731 = false
-end)
-
--- MINIMIZE button functionality
-_CWS20.MouseButton1Click:Connect(function()
-    _fvy5.Size = UDim2.new(0, 250, 0, 30)
-    _Njo15.Visible = false
-    _Dyg16.Visible = false
-    _Nk_18.Visible = false
-    _Wsp17.Visible = false
-    _Rcf10.Visible = false
-    _CWS20.Visible = false
-    _O8T21.Visible = true
-    _wZe7.Visible = false
-end)
-
--- RESTORE button functionality
-_O8T21.MouseButton1Click:Connect(function()
-    _fvy5.Size = UDim2.new(0, 250, 0, 200)
-    _Njo15.Visible = true
-    _Dyg16.Visible = true
-    _Nk_18.Visible = true
-    _Wsp17.Visible = true
-    _Rcf10.Visible = true
-    _CWS20.Visible = true
-    _O8T21.Visible = false
-    if _R_S28 then
-        _wZe7.Visible = true
-    end
-end)
-
--- NoClip Loop
-_UyY1.Stepped:Connect(function()
-    setNoCollision()
-end)
-
--- Character Added
-_8_h22.CharacterAdded:Connect(function(char)
-    updateCharacterReferences()
-    wait(0.7)
-    
-    -- Reset states when _1zJ23 respawns
-    if _4tH27 then
-        toggleSpeedWalk()
-    end
-    
-    if _USk26 then
-        toggleNoClip()
-    end
-    
-    if _R_S28 then
-        toggleFly()
-    end
-    
-    game._WI30.LocalPlayer.Character.Humanoid.PlatformStand = false
-    game._WI30.LocalPlayer.Character.Animate.Disabled = false
-end)
-
--- Update _oJw13 values when textbox changes
-_Wsp17.FocusLost:Connect(function()
-    local _T8H55 = tonumber(_Wsp17.Text)
-    if not _T8H55 then
-        _Wsp17.Text = "0.01"
-    end
-    
-    if _4tH27 then
+    if speedWalkEnabled then
         toggleSpeedWalk()
         wait(0.1)
         toggleSpeedWalk()
