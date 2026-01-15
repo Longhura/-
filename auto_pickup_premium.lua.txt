@@ -1,0 +1,656 @@
+--[[
+    AUTO PICKUP + FIX ALL GAME (PREMIUM VERSION)
+    By ChatGPT | Mobile + PC
+    ✓ Nhặt All 360° | ✓ Quét Danh Sách | ✓ Khóa Vật Thông Minh
+    ✓ Xem Danh Sách Khóa | ✓ Highlights Xuyên Tường | ✓ Định Vị Vật Giống
+]]
+
+-- ================= SERVICES =================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LP = Players.LocalPlayer
+local Char, HRP, Cam
+
+-- ================= SETTINGS =================
+local enabled = false
+local frontOnly = true
+local range = 12
+local delayTime = 0.25
+local blacklist = {} -- {name = "type"} : "all" = khóa toàn bộ, "solo" = chỉ vật này
+local interactedObjects = {}
+local highlightedObjects = {} -- Danh sách các vật đang highlight
+
+-- ================= LOAD CHARACTER =================
+local function loadChar()
+	Char = LP.Character or LP.CharacterAdded:Wait()
+	HRP = Char:WaitForChild("HumanoidRootPart")
+	Cam = workspace.CurrentCamera
+end
+loadChar()
+LP.CharacterAdded:Connect(function()
+	loadChar()
+	interactedObjects = {}
+	-- Xóa highlights khi respawn
+	for _, h in ipairs(highlightedObjects) do
+		if h and h.Parent then h:Destroy() end
+	end
+	highlightedObjects = {}
+end)
+
+-- ================= UI SETUP =================
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "AutoPickup_Premium"
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- ================= MAIN BUTTON =================
+local icon = Instance.new("TextButton", gui)
+icon.Size = UDim2.new(0, 60, 0, 60)
+icon.Position = UDim2.new(0, 20, 0, 200)
+icon.Text = "⚙"
+icon.Font = Enum.Font.GothamBold
+icon.TextSize = 28
+icon.BackgroundColor3 = Color3.fromRGB(0, 150, 136)
+icon.TextColor3 = Color3.new(1, 1, 1)
+icon.Active, icon.Draggable = true, true
+icon.BorderSizePixel = 0
+
+local corner = Instance.new("UICorner", icon)
+corner.CornerRadius = UDim.new(0, 12)
+
+-- ================= MAIN MENU =================
+local menu = Instance.new("Frame", gui)
+menu.Size = UDim2.new(0, 280, 0, 560)
+menu.Position = UDim2.new(0, 90, 0, 200)
+menu.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+menu.Visible = false
+menu.Active, menu.Draggable = true, true
+menu.BorderSizePixel = 0
+
+local menuCorner = Instance.new("UICorner", menu)
+menuCorner.CornerRadius = UDim.new(0, 15)
+
+local menuStroke = Instance.new("UIStroke", menu)
+menuStroke.Color = Color3.fromRGB(0, 150, 136)
+menuStroke.Thickness = 2
+
+-- ================= SCAN WINDOW =================
+local scanWindow = Instance.new("Frame", gui)
+scanWindow.Size = UDim2.new(0, 350, 0, 450)
+scanWindow.Position = UDim2.new(0, 400, 0, 200)
+scanWindow.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+scanWindow.Visible = false
+scanWindow.Active, scanWindow.Draggable = true, true
+scanWindow.BorderSizePixel = 0
+
+local scanCorner = Instance.new("UICorner", scanWindow)
+scanCorner.CornerRadius = UDim.new(0, 15)
+
+local scanStroke = Instance.new("UIStroke", scanWindow)
+scanStroke.Color = Color3.fromRGB(76, 175, 80)
+scanStroke.Thickness = 2
+
+-- ================= BLACKLIST WINDOW =================
+-- Thêm cửa sổ hiển thị danh sách khóa
+local blacklistWindow = Instance.new("Frame", gui)
+blacklistWindow.Size = UDim2.new(0, 350, 0, 450)
+blacklistWindow.Position = UDim2.new(0, 760, 0, 200)
+blacklistWindow.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+blacklistWindow.Visible = false
+blacklistWindow.Active, blacklistWindow.Draggable = true, true
+blacklistWindow.BorderSizePixel = 0
+
+local blacklistCorner = Instance.new("UICorner", blacklistWindow)
+blacklistCorner.CornerRadius = UDim.new(0, 15)
+
+local blacklistStroke = Instance.new("UIStroke", blacklistWindow)
+blacklistStroke.Color = Color3.fromRGB(200, 50, 50)
+blacklistStroke.Thickness = 2
+
+-- ================= BLACKLIST LIST =================
+-- ScrollingFrame cho danh sách khóa
+local blacklistList = Instance.new("ScrollingFrame", blacklistWindow)
+blacklistList.Size = UDim2.new(0, 320, 0, 400)
+blacklistList.Position = UDim2.new(0, 15, 0, 50)
+blacklistList.BackgroundTransparency = 1
+blacklistList.ScrollBarThickness = 6
+blacklistList.CanvasSize = UDim2.new(0, 0, 0, 0)
+blacklistList.BorderSizePixel = 0
+
+-- ================= SCAN LIST =================
+local scanList = Instance.new("ScrollingFrame", scanWindow)
+scanList.Size = UDim2.new(0, 320, 0, 400)
+scanList.Position = UDim2.new(0, 15, 0, 50)
+scanList.BackgroundTransparency = 1
+scanList.ScrollBarThickness = 6
+scanList.CanvasSize = UDim2.new(0, 0, 0, 0)
+scanList.BorderSizePixel = 0
+
+-- ================= UI HELPER FUNCTION =================
+local function newBtn(text, y, parent, color)
+	color = color or Color3.fromRGB(50, 50, 55)
+	local b = Instance.new("TextButton", parent)
+	b.Size = UDim2.new(0, 250, 0, 32)
+	b.Position = UDim2.new(0, 15, 0, y)
+	b.Text = text
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 12
+	b.BackgroundColor3 = color
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.BorderSizePixel = 0
+	
+	local btnCorner = Instance.new("UICorner", b)
+	btnCorner.CornerRadius = UDim.new(0, 8)
+	
+	return b
+end
+
+local function newLabel(text, y, parent)
+	local l = Instance.new("TextLabel", parent)
+	l.Size = UDim2.new(0, 250, 0, 24)
+	l.Position = UDim2.new(0, 15, 0, y)
+	l.Text = text
+	l.Font = Enum.Font.GothamBold
+	l.TextSize = 13
+	l.BackgroundTransparency = 1
+	l.TextColor3 = Color3.fromRGB(200, 200, 200)
+	return l
+end
+
+-- ================= MENU TOGGLE =================
+icon.MouseButton1Click:Connect(function()
+	menu.Visible = not menu.Visible
+	scanWindow.Visible = false
+	blacklistWindow.Visible = false
+end)
+
+-- ================= TITLE =================
+newLabel("AUTO PICKUP - PREMIUM", 10, menu)
+
+-- ================= AUTO PICKUP TOGGLE =================
+local toggle = newBtn("AUTO PICKUP : OFF", 40, menu, Color3.fromRGB(200, 50, 50))
+toggle.MouseButton1Click:Connect(function()
+	enabled = not enabled
+	toggle.BackgroundColor3 = enabled and Color3.fromRGB(76, 175, 80) or Color3.fromRGB(200, 50, 50)
+	toggle.Text = enabled and "✓ AUTO PICKUP : ON" or "✗ AUTO PICKUP : OFF"
+end)
+
+-- ================= FRONT ONLY TOGGLE =================
+local frontBtn = newBtn("FRONT ONLY : ON", 82, menu, Color3.fromRGB(0, 150, 136))
+frontBtn.MouseButton1Click:Connect(function()
+	frontOnly = not frontOnly
+	frontBtn.BackgroundColor3 = frontOnly and Color3.fromRGB(0, 150, 136) or Color3.fromRGB(80, 80, 85)
+	frontBtn.Text = (frontOnly and "↑ FRONT ONLY : ON" or "↔ FRONT ONLY : OFF")
+end)
+
+-- ================= PICK ALL 360 =================
+local pickAllBtn = newBtn("🎯 NHẶT ALL (360°)", 124, menu, Color3.fromRGB(255, 152, 0))
+pickAllBtn.MouseButton1Click:Connect(function()
+	if not HRP then return end
+	
+	local picked = 0
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if not obj:IsA("BasePart") then continue end
+		if (HRP.Position - obj.Position).Magnitude > range then continue end
+		if blacklist[obj.Name] == "all" or blacklist[obj.Name] == "solo" then continue end
+		
+		for _, v in ipairs(obj:GetDescendants()) do
+			if v:IsA("ProximityPrompt") and v.Enabled then
+				pcall(function()
+					v.HoldDuration = 0
+					fireproximityprompt(v)
+					picked += 1
+				end)
+			end
+		end
+	end
+	
+	print("[AUTO PICKUP] Nhặt " .. picked .. " vật!")
+end)
+
+-- ================= SCAN BUTTON =================
+local scanBtn = newBtn("🔍 QUÉT DANH SÁCH", 166, menu, Color3.fromRGB(76, 175, 80))
+scanBtn.MouseButton1Click:Connect(function()
+	scanWindow.Visible = not scanWindow.Visible
+	menu.Visible = false
+	blacklistWindow.Visible = false
+	
+	-- Clear previous list
+	scanList.CanvasSize = UDim2.new(0, 0, 0, 0)
+	for _, child in ipairs(scanList:GetChildren()) do
+		child:Destroy()
+	end
+	
+	local yPos = 0
+	local foundObjects = {}
+	
+	-- Scan for interactive objects
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if not obj:IsA("BasePart") then continue end
+		if (HRP.Position - obj.Position).Magnitude > range then continue end
+		
+		-- Check if has ProximityPrompt
+		local hasPrompt = false
+		for _, v in ipairs(obj:GetDescendants()) do
+			if v:IsA("ProximityPrompt") then
+				hasPrompt = true
+				break
+			end
+		end
+		
+		if hasPrompt then
+			table.insert(foundObjects, obj)
+		end
+	end
+	
+	-- Create UI for each object
+	for _, obj in ipairs(foundObjects) do
+		local itemFrame = Instance.new("Frame", scanList)
+		itemFrame.Size = UDim2.new(0, 320, 0, 50)
+		itemFrame.Position = UDim2.new(0, 0, 0, yPos)
+		itemFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+		itemFrame.BorderSizePixel = 0
+		
+		local itemCorner = Instance.new("UICorner", itemFrame)
+		itemCorner.CornerRadius = UDim.new(0, 8)
+		
+		local itemLabel = Instance.new("TextLabel", itemFrame)
+		itemLabel.Size = UDim2.new(0, 130, 0, 50)
+		itemLabel.Position = UDim2.new(0, 10, 0, 0)
+		itemLabel.Text = obj.Name
+		itemLabel.Font = Enum.Font.Gotham
+		itemLabel.TextSize = 11
+		itemLabel.BackgroundTransparency = 1
+		itemLabel.TextColor3 = Color3.new(1, 1, 1)
+		itemLabel.TextXAlignment = Enum.TextXAlignment.Left
+		
+		-- Lock button (🔒)
+		local lockBtn = Instance.new("TextButton", itemFrame)
+		lockBtn.Size = UDim2.new(0, 32, 0, 32)
+		lockBtn.Position = UDim2.new(0, 150, 0, 9)
+		lockBtn.Text = "🔒"
+		lockBtn.Font = Enum.Font.GothamBold
+		lockBtn.TextSize = 14
+		lockBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+		lockBtn.TextColor3 = Color3.new(1, 1, 1)
+		lockBtn.BorderSizePixel = 0
+		
+		local lockCorner = Instance.new("UICorner", lockBtn)
+		lockCorner.CornerRadius = UDim.new(0, 6)
+		
+		lockBtn.MouseButton1Click:Connect(function()
+			blacklist[obj.Name] = "all"
+			lockBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+			lockBtn.Text = "✓"
+			print("[LOCK] Khóa " .. obj.Name)
+		end)
+		
+		-- Solo button (🛠️)
+		local soloBtn = Instance.new("TextButton", itemFrame)
+		soloBtn.Size = UDim2.new(0, 32, 0, 32)
+		soloBtn.Position = UDim2.new(0, 192, 0, 9)
+		soloBtn.Text = "🛠️"
+		soloBtn.Font = Enum.Font.GothamBold
+		soloBtn.TextSize = 14
+		soloBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 150)
+		soloBtn.TextColor3 = Color3.new(1, 1, 1)
+		soloBtn.BorderSizePixel = 0
+		
+		local soloCorner = Instance.new("UICorner", soloBtn)
+		soloCorner.CornerRadius = UDim.new(0, 6)
+		
+		soloBtn.MouseButton1Click:Connect(function()
+			if blacklist[obj.Name] == "solo" then
+				blacklist[obj.Name] = nil
+				soloBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 150)
+				soloBtn.Text = "🛠️"
+				print("[UNLOCK] Mở khóa " .. obj.Name)
+			else
+				blacklist[obj.Name] = "solo"
+				soloBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+				soloBtn.Text = "✓"
+				print("[SKIP] Bỏ qua " .. obj.Name)
+			end
+		end)
+		
+		-- Interact button (✅)
+		local interactBtn = Instance.new("TextButton", itemFrame)
+		interactBtn.Size = UDim2.new(0, 32, 0, 32)
+		interactBtn.Position = UDim2.new(0, 234, 0, 9)
+		interactBtn.Text = "✅"
+		interactBtn.Font = Enum.Font.GothamBold
+		interactBtn.TextSize = 14
+		interactBtn.BackgroundColor3 = Color3.fromRGB(76, 175, 80)
+		interactBtn.TextColor3 = Color3.new(1, 1, 1)
+		interactBtn.BorderSizePixel = 0
+		
+		local interactCorner = Instance.new("UICorner", interactBtn)
+		interactCorner.CornerRadius = UDim.new(0, 6)
+		
+		interactBtn.MouseButton1Click:Connect(function()
+			-- Interact immediately without distance limit
+			for _, v in ipairs(obj:GetDescendants()) do
+				if v:IsA("ProximityPrompt") and v.Enabled then
+					pcall(function()
+						v.HoldDuration = 0
+						fireproximityprompt(v)
+					end)
+				end
+			end
+			interactBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+			interactBtn.Text = "✓"
+			print("[INTERACT] Tương tác " .. obj.Name)
+			task.wait(0.3)
+			interactBtn.BackgroundColor3 = Color3.fromRGB(76, 175, 80)
+			interactBtn.Text = "✅"
+		end)
+		
+		-- Thêm nút highlight (👀)
+		local highlightBtn = Instance.new("TextButton", itemFrame)
+		highlightBtn.Size = UDim2.new(0, 32, 0, 32)
+		highlightBtn.Position = UDim2.new(0, 276, 0, 9)
+		highlightBtn.Text = "👀"
+		highlightBtn.Font = Enum.Font.GothamBold
+		highlightBtn.TextSize = 14
+		highlightBtn.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+		highlightBtn.TextColor3 = Color3.new(1, 1, 1)
+		highlightBtn.BorderSizePixel = 0
+		
+		local highlightCorner = Instance.new("UICorner", highlightBtn)
+		highlightCorner.CornerRadius = UDim.new(0, 6)
+		
+		highlightBtn.MouseButton1Click:Connect(function()
+			-- Highlight this specific object
+			if obj:FindFirstChild("_Highlight") then
+				obj:FindFirstChild("_Highlight"):Destroy()
+				table.remove(highlightedObjects, table.find(highlightedObjects, obj:FindFirstChild("_Highlight")))
+				highlightBtn.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+				print("[HIGHLIGHT] Tắt highlight " .. obj.Name)
+			else
+				local h = Instance.new("Highlight", obj)
+				h.Name = "_Highlight"
+				h.FillColor = Color3.fromRGB(0, 255, 150)
+				h.OutlineColor = Color3.fromRGB(0, 255, 150)
+				h.Adornee = obj
+				table.insert(highlightedObjects, h)
+				highlightBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+				print("[HIGHLIGHT] Highlight " .. obj.Name)
+			end
+		end)
+		
+		yPos += 60
+	end
+	
+	scanList.CanvasSize = UDim2.new(0, 0, 0, yPos)
+	print("[SCAN] Tìm thấy " .. #foundObjects .. " vật tương tác!")
+end)
+
+-- ================= VIEW BLACKLIST BUTTON =================
+-- Thêm nút xem danh sách khóa
+local viewBlacklistBtn = newBtn("📋 DANH SÁCH KHÓA", 208, menu, Color3.fromRGB(200, 100, 50))
+viewBlacklistBtn.MouseButton1Click:Connect(function()
+	blacklistWindow.Visible = not blacklistWindow.Visible
+	menu.Visible = false
+	scanWindow.Visible = false
+	
+	-- Clear previous list
+	blacklistList.CanvasSize = UDim2.new(0, 0, 0, 0)
+	for _, child in ipairs(blacklistList:GetChildren()) do
+		child:Destroy()
+	end
+	
+	local yPos = 0
+	local count = 0
+	
+	-- Display locked items
+	for name, lockType in pairs(blacklist) do
+		local itemFrame = Instance.new("Frame", blacklistList)
+		itemFrame.Size = UDim2.new(0, 320, 0, 45)
+		itemFrame.Position = UDim2.new(0, 0, 0, yPos)
+		itemFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+		itemFrame.BorderSizePixel = 0
+		
+		local itemCorner = Instance.new("UICorner", itemFrame)
+		itemCorner.CornerRadius = UDim.new(0, 8)
+		
+		local itemLabel = Instance.new("TextLabel", itemFrame)
+		itemLabel.Size = UDim2.new(0, 150, 0, 45)
+		itemLabel.Position = UDim2.new(0, 10, 0, 0)
+		itemLabel.Text = name .. " (" .. lockType .. ")"
+		itemLabel.Font = Enum.Font.Gotham
+		itemLabel.TextSize = 10
+		itemLabel.BackgroundTransparency = 1
+		itemLabel.TextColor3 = Color3.new(1, 1, 1)
+		itemLabel.TextXAlignment = Enum.TextXAlignment.Left
+		
+		-- Unlock button (🔑)
+		local unlockBtn = Instance.new("TextButton", itemFrame)
+		unlockBtn.Size = UDim2.new(0, 35, 0, 35)
+		unlockBtn.Position = UDim2.new(0, 170, 0, 5)
+		unlockBtn.Text = "🔑"
+		unlockBtn.Font = Enum.Font.GothamBold
+		unlockBtn.TextSize = 16
+		unlockBtn.BackgroundColor3 = Color3.fromRGB(255, 193, 7)
+		unlockBtn.TextColor3 = Color3.new(1, 1, 1)
+		unlockBtn.BorderSizePixel = 0
+		
+		local unlockCorner = Instance.new("UICorner", unlockBtn)
+		unlockCorner.CornerRadius = UDim.new(0, 6)
+		
+		unlockBtn.MouseButton1Click:Connect(function()
+			blacklist[name] = nil
+			print("[UNLOCK] Đã mở khóa " .. name)
+			-- Refresh the blacklist window
+			viewBlacklistBtn:Fire()
+		end)
+		
+		-- Locate similar button (😶‍🌫️)
+		local locateBtn = Instance.new("TextButton", itemFrame)
+		locateBtn.Size = UDim2.new(0, 35, 0, 35)
+		locateBtn.Position = UDim2.new(0, 217, 0, 5)
+		locateBtn.Text = "😶"
+		locateBtn.Font = Enum.Font.GothamBold
+		locateBtn.TextSize = 14
+		locateBtn.BackgroundColor3 = Color3.fromRGB(156, 39, 176)
+		locateBtn.TextColor3 = Color3.new(1, 1, 1)
+		locateBtn.BorderSizePixel = 0
+		
+		local locateCorner = Instance.new("UICorner", locateBtn)
+		locateCorner.CornerRadius = UDim.new(0, 6)
+		
+		locateBtn.MouseButton1Click:Connect(function()
+			-- Find and highlight all similar objects
+			local similarCount = 0
+			for _, obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("BasePart") and string.find(obj.Name, name) then
+					if obj:FindFirstChild("_LocateHighlight") then
+						obj:FindFirstChild("_LocateHighlight"):Destroy()
+					else
+						local h = Instance.new("Highlight", obj)
+						h.Name = "_LocateHighlight"
+						h.FillColor = Color3.fromRGB(255, 0, 150)
+						h.OutlineColor = Color3.fromRGB(255, 0, 150)
+						h.Adornee = obj
+						table.insert(highlightedObjects, h)
+						similarCount += 1
+					end
+				end
+			end
+			print("[LOCATE] Đã highlight " .. similarCount .. " vật giống " .. name)
+		end)
+		
+		yPos += 50
+		count += 1
+	end
+	
+	if count == 0 then
+		local emptyLabel = Instance.new("TextLabel", blacklistList)
+		emptyLabel.Size = UDim2.new(0, 320, 0, 50)
+		emptyLabel.Position = UDim2.new(0, 0, 0, 50)
+		emptyLabel.Text = "Không có vật bị khóa"
+		emptyLabel.Font = Enum.Font.Gotham
+		emptyLabel.TextSize = 12
+		emptyLabel.BackgroundTransparency = 1
+		emptyLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+	end
+	
+	blacklistList.CanvasSize = UDim2.new(0, 0, 0, math.max(yPos, 60))
+end)
+
+-- ================= RANGE CONTROL =================
+newLabel("PHẠM VI", 250, menu)
+
+local rMinus = newBtn("-", 274, menu, Color3.fromRGB(200, 50, 50))
+local rPlus = newBtn("+", 318, menu, Color3.fromRGB(76, 175, 80))
+local rBox = Instance.new("TextBox", menu)
+rBox.Size = UDim2.new(0, 250, 0, 28)
+rBox.Position = UDim2.new(0, 15, 0, 296)
+rBox.Text = tostring(range)
+rBox.Font = Enum.Font.Gotham
+rBox.TextSize = 12
+rBox.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+rBox.TextColor3 = Color3.new(1, 1, 1)
+rBox.BorderSizePixel = 0
+
+local rBoxCorner = Instance.new("UICorner", rBox)
+rBoxCorner.CornerRadius = UDim.new(0, 8)
+
+rMinus.MouseButton1Click:Connect(function()
+	range = math.max(3, range - 1)
+	rBox.Text = range
+end)
+
+rPlus.MouseButton1Click:Connect(function()
+	range = range + 1
+	rBox.Text = range
+end)
+
+rBox.FocusLost:Connect(function()
+	range = tonumber(rBox.Text) or range
+	rBox.Text = tostring(range)
+end)
+
+-- ================= FIX BUTTON =================
+local fixBtn = newBtn("🔧 FIX REAL", 350, menu, Color3.fromRGB(255, 152, 0))
+
+-- ================= CLOSE SCAN BUTTON =================
+local closeBtn = Instance.new("TextButton", scanWindow)
+closeBtn.Size = UDim2.new(0, 320, 0, 32)
+closeBtn.Position = UDim2.new(0, 15, 0, 10)
+closeBtn.Text = "✕ ĐÓNG"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 12
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.BorderSizePixel = 0
+
+local closeCorner = Instance.new("UICorner", closeBtn)
+closeCorner.CornerRadius = UDim.new(0, 8)
+
+closeBtn.MouseButton1Click:Connect(function()
+	scanWindow.Visible = false
+	menu.Visible = true
+end)
+
+-- ================= CLOSE BLACKLIST BUTTON =================
+-- Thêm nút đóng cho blacklist window
+local closeBlacklistBtn = Instance.new("TextButton", blacklistWindow)
+closeBlacklistBtn.Size = UDim2.new(0, 320, 0, 32)
+closeBlacklistBtn.Position = UDim2.new(0, 15, 0, 10)
+closeBlacklistBtn.Text = "✕ ĐÓNG"
+closeBlacklistBtn.Font = Enum.Font.GothamBold
+closeBlacklistBtn.TextSize = 12
+closeBlacklistBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeBlacklistBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBlacklistBtn.BorderSizePixel = 0
+
+local closeBlacklistCorner = Instance.new("UICorner", closeBlacklistBtn)
+closeBlacklistCorner.CornerRadius = UDim.new(0, 8)
+
+closeBlacklistBtn.MouseButton1Click:Connect(function()
+	blacklistWindow.Visible = false
+	menu.Visible = true
+end)
+
+-- ================= CORE FUNCTIONS =================
+
+local function inFront(obj)
+	if not frontOnly then return true end
+	local dir = (obj.Position - HRP.Position).Unit
+	return HRP.CFrame.LookVector:Dot(dir) > 0
+end
+
+local function safeInteract(model)
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("ProximityPrompt") and v.Enabled then
+			pcall(function()
+				v.HoldDuration = 0
+				fireproximityprompt(v)
+			end)
+		end
+	end
+end
+
+local function fixHitbox()
+	if not Char then return end
+	for _, v in ipairs(Char:GetDescendants()) do
+		if v:IsA("BasePart") then
+			pcall(function()
+				v.Massless = false
+				v.CustomPhysicalProperties = PhysicalProperties.new(1, 0.3, 0.5)
+			end)
+		end
+	end
+end
+
+local function fixPrompt()
+	for _, v in ipairs(workspace:GetDescendants()) do
+		if v:IsA("ProximityPrompt") then
+			pcall(function()
+				v.Enabled = true
+				v.HoldDuration = 0
+			end)
+		end
+	end
+end
+
+local function fixRay()
+	pcall(function()
+		Cam:Reset()
+	end)
+end
+
+fixBtn.MouseButton1Click:Connect(function()
+	fixHitbox()
+	fixPrompt()
+	fixRay()
+	print("[FIX] Đã phục hồi hệ thống!")
+end)
+
+-- ================= KEYBOARD SHORTCUT =================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.F12 then
+		menu.Visible = not menu.Visible
+		scanWindow.Visible = false
+		blacklistWindow.Visible = false
+	end
+end)
+
+-- ================= MAIN LOOP =================
+task.spawn(function()
+	while task.wait(delayTime) do
+		if not enabled or not HRP then continue end
+
+		for _, obj in ipairs(workspace:GetDescendants()) do
+			if not obj:IsA("BasePart") then continue end
+			if (HRP.Position - obj.Position).Magnitude > range then continue end
+			if not inFront(obj) then continue end
+			if blacklist[obj.Name] == "all" or blacklist[obj.Name] == "solo" then continue end
+
+			safeInteract(obj)
+		end
+	end
+end)
+
+print("[AUTO PICKUP PREMIUM] Script đã tải! Nhấn F12 để mở menu.")
